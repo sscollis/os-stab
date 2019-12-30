@@ -1,3 +1,11 @@
+12/30-2019
+
+Updated Orr-Sommerfeld solvers for gfortran 
+
+  conte.f     Solves OS for channel using Godunov-Conte shooting
+  contebl.f   Solve Blasius and then OS for boundary layer using Conte
+  bl.f        Spectral collocation solver for Blasius equation
+
 7-13-97
 
 Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
