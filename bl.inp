@@ -1,0 +1,19 @@
+16
+0.0
+-1.0
+1.0e-12
+1000
+128
+0
+bl.out
+
+#==============================================================================
+
+This is the example input file for the bl.f that is run using the command:
+
+./bl < bl.inp
+
+The interpolated output is in fort.10 the normal output is in bl.out
+
+Scott Collis
+Fri Dec 27 10:23:18 MST 2019

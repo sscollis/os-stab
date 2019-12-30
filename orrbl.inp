@@ -1,0 +1,20 @@
+#
+# Blasius boundary layer input file
+#
+# Set nbl = nstep or you don't get good eigenfunctions?
+#
+nbl = 1000              # number of in profile
+nstep = 1000            # number of integration points
+testalpha = 0.2         # Ortho. constraint (0 - 1)
+Re = 581.1              # Reynolds number
+beta = 0.0              # Falker-Skan parameter
+fp2 = 0.50              # Guess for profile slope
+alphar = 0.1453         # Real part of alpha
+alphai = 0.0            # Imag part of alpha
+cr = 0.35               # Guess for Re(c)
+ci = 0.01               # Guess for Im(c)
+Ymin = 0.0              # Minimum Y
+Ymax = 15.0             # Maximum Y
+#
+# End of input file
+#

@@ -1,0 +1,16 @@
+7-13-97
+
+Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
+Layer.  Also bl.f is a spectral blasius flow solver.
+
+3-07-2001
+
+I have updated the following codes to use LAPack routines
+
+orrncbl.f	This finds the neutral curve for Boundary layer and
+		channel profiles
+
+orrcolchan.f	Solve Orr-Sommerfeld for channel profile
+
+S. Collis
+
