@@ -1,10 +1,19 @@
-12/30-2019
+12-30-2019
 
 Updated Orr-Sommerfeld solvers for gfortran 
 
   conte.f     Solves OS for channel using Godunov-Conte shooting
   contebl.f   Solve Blasius and then OS for boundary layer using Conte
   bl.f        Spectral collocation solver for Blasius equation
+
+Numerous updates in this version include:
+
+  1. Fixed bug in eigenfunction values at nstep
+  2. Improved orthonormalization criteria
+  3. Switch from IMSL to LAPACK (need to test still)
+  4. Updated to support gfortran in makefile
+  5. Added scripts for gnuplot output
+  6. Improved some inline documentation
 
 7-13-97
 
