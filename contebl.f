@@ -40,7 +40,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /setup/  n, u, d2u, ymin, ymax, h, f2p,
-     .                     rgamma, beta, uspl, d2uspl, ydat
+     &                     rgamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -80,7 +80,7 @@ c     Input parameters
 c
       write (*,10)
   10  format (/,10x,'Solve Orr-Sommerfeld for Boundary Layer using ',
-     .        'shooting',/)
+     &        'shooting',/)
       write (*,15)
   15  format(/,1x,'Read from keyboard, file, default (k,f,d) ==> ',$)
       read (*,'(a)') input
@@ -321,19 +321,7 @@ c
 c         Loop thru all homogeneous solutions
 c
           do m = 1, n-r
-#ifdef USE_ODEINT
-            do i = 1, n
-              Utemp(i) = U(i,m,k-1)
-            end do
-            call ODEINT(Utemp,n,t+h,t,1.E-5,-h/2.,1.e-20,nok,nbad,
-     .                  FHOMO,RKQC)
-c           write (*,*) k, nok, nbad
-            do i = 1, n
-              U(i,m,k) = Utemp(i)
-            end do
-#else
             call CRK4(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
-#endif
           end do
 c
 c         Test to see if normalization is required
@@ -349,8 +337,8 @@ c
                 test = cc/SQRT(aa*bb)
                 test = acos(cc/SQRT(aa*bb))
 c               test = ACOS( ABS ( inprod(n, U(1,mi,k), U(1,mj,k)) / 
-c      .                      SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
-c      .                            inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
+c      &                      SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
+c      &                            inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
 c               if (test .gt. testalpha) norm = .true.
                 if (test .lt. ta) norm = .true.
 c               if (norm) write (*,*) k, mi, mj, test, testalpha, norm
@@ -403,7 +391,7 @@ c
                   P(j,i,q) = 0.0
                   do s = i, j-1
                     P(j,i,q) = P(j,i,q)-inprod(n,U(1,j,k),z(1,s))/w(j)*
-     .                         P(s,i,q)
+     &                         P(s,i,q)
                   end do
                 end if
               end do
@@ -485,7 +473,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           Bt = (2.*qt+1.)*err-(1.+qt)**2*errm1+qt**2*errm2
           Ct = (1.+qt)*err
           if ( ABS(Bt+SQRT(Bt**2-4.*At*Ct)) .gt. 
-     .         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
+     &         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
              c = ctemp-(ctemp-cm1)*2.*Ct/(Bt+SQRT(Bt**2-4.*At*Ct))
           else
              c = ctemp-(ctemp-cm1)*2.*Ct/(Bt-SQRT(Bt**2-4.*At*Ct))
@@ -496,7 +484,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           errm1 = err
         end if
         write (*,30) icount,real(ctemp),aimag(ctemp),real(err),
-     .               aimag(err)
+     &               aimag(err)
   30    format (1x,i4,2(e17.8,e17.8,3x))
         icount = icount + 1
       end do
@@ -544,7 +532,6 @@ c
               y(i,k) = y(i,k) + U(i,m,k)*B(m,q-1)
             end do
           end do
-c         if ( ABS(REAL(y(i,k))) .gt. ABS(REAL(vmax)) ) then
           if ( ABS(y(i,k)) .gt. ABS(vmax) ) then
             vmax = y(i,k)
           end if
@@ -683,7 +670,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     .                    rgamma, beta, uspl, d2uspl, ydat
+     &                    rgamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -696,15 +683,18 @@ c***********************************************************************
 c
 c     Get the velocity field
 c
+#if 0
       call SPEVAL(n+1,ydat,U,Uspl,t,UU)
       call SPEVAL(n+1,ydat,d2U,d2Uspl,t,d2UU)
-
+#else
+      call SPDER(n+1,ydat,U,Uspl,t,UU,dUU,d2UU)
+#endif
       do j = 1 , neq-1
         yf(j) = yo(j+1)
       end do
       yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)) 
+     &          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &          d2UU*yo(1)) 
 
       return
       end
@@ -725,7 +715,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     .                    rgamma, beta, uspl, d2uspl, ydat
+     &                    rgamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -738,15 +728,18 @@ c***********************************************************************
 c
 c     Get the velocity field
 c
+#if 0
       call SPEVAL(n+1,ydat,U,Uspl,t,UU)
       call SPEVAL(n+1,ydat,d2U,d2Uspl,t,d2UU)
-
+#else
+      call SPDER(n+1,ydat,U,Uspl,t,UU,dUU,d2UU)
+#endif
       do j = 1 , neq-1
         yf(j) = yo(j+1)
       end do
       yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)) 
+     &          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &          d2UU*yo(1)) 
 
       return
       end
@@ -768,7 +761,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     .                    rgamma, beta, uspl, d2uspl, ydat
+     &                    rgamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -796,18 +789,7 @@ c
 
         do i = 1, n
           y = ymin + float(i)*h
-#ifdef USE_ODEINT
-          do j = 1, 3
-            eta(j) = xi(j,i-1)
-          end do
-          call ODEINTR(eta,3,y-h,y,1.E-7,h/2.,1.e-20,nok,nbad,BLASIUS,
-     &                 RKQCR)
-          do j = 1, 3
-            xi(j,i) = eta(j)
-          end do
-#else
           call SRK4(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
-#endif 
         end do
 c
 c       Check f'(ymax)
@@ -818,7 +800,7 @@ c
         else
           xi3temp = xi(3,0)
           xi(3,0) = xi(3,0)+((xi3old-xi(3,0))/(xi2old-xi(2,n)))*
-     .              (1.0 - xi(2,n))
+     &              (1.0 - xi(2,n))
           xi3old = xi3temp
         end if
         p = p + 1
@@ -860,10 +842,10 @@ c
 c     open (10, FILE='bl.dat', ACTION='WRITE', FORM='FORMATTED')
       do i = 0, n
         y = ymin + i*h
-        call SPEVAL(n+1,ydat,u,uspl,y,us)
+        call SPDER(n+1,ydat,u,uspl,y,us,dus,ddus)
         call SPEVAL(n+1,ydat,d2u,d2uspl,y,d2us)
-        write (10,10) y, us, d2us, u(i), d2u(i)
-  10    format (1x,5(ES16.8E3,1x))
+        write (10,10) y, us, dus, ddus, d2us, u(i), d2u(i)
+  10    format (1x,7(ES16.8E3,1x))
       end do
 c     close(10)
       
@@ -889,7 +871,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     .                    rgamma, beta, uspl, d2uspl, ydat
+     &                    rgamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -966,7 +948,7 @@ C.... Note: this routine is in the public domain and available
 C     at https://web.stanford.edu/class/me200c/
 C
 C-----THIS SUBROUTINE EVALUATES THE CUBIC SPLINE GIVEN       
-C-----THE DERIVATIVE COMPUTED BY SUBROUTINE SPLINE.          
+C-----THE 2ND DERIVATIVE COMPUTED BY SUBROUTINE SPLINE.          
 C-----THE INPUT PARAMETERS N,X,Y,FDP HAVE THE SAME 
 C-----MEANING AS IN SPLINE.    
 C-----XX = VALUE OF INDEPENDENT VARIABLE FOR WHICH 
@@ -987,6 +969,41 @@ C-----NOW EVALUATE THE CUBIC
      2   +Y(I)*DXP/DEL + Y(I+1)*DXM/DEL 
       RETURN        
       END 
+
+C***********************************************************************
+      SUBROUTINE SPDER(N,X,Y,FDP,XX,F,FP,FPP)
+C***********************************************************************
+C
+C.... Note: this routine is in the public domain and available
+C     at https://web.stanford.edu/class/me200c/
+C
+C-----THIS SUBROUTINE EVALUATES THE CUBIC SPLINE GIVEN       
+C-----THE 2ND DERIVATIVE COMPUTED BY SUBROUTINE SPLINE.          
+C-----THE INPUT PARAMETERS N,X,Y,FDP HAVE THE SAME 
+C-----MEANING AS IN SPLINE.    
+C-----XX = VALUE OF INDEPENDENT VARIABLE FOR WHICH 
+C-----     AN INTERPOLATED VALUE IS REQUESTED      
+C-----F =  THE INTERPOLATED RESULT       
+C-----FP = THE INTERPOLATED DERIVATIVE RESULT       
+      DIMENSION X(N),Y(N),FDP(N)
+C-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.          
+      NM1 = N - 1
+      DO 1 I=1,NM1
+      IF (XX.LE.X(I+1)) GO TO 10
+    1 CONTINUE   
+C-----NOW EVALUATE THE CUBIC   
+   10 DXM = XX - X(I)
+      DXP = X(I+1) - XX
+      DEL = X(I+1) - X(I)
+      F = FDP(I)*DXP*(DXP*DXP/DEL - DEL)/6.0
+     1   +FDP(I+1)*DXM*(DXM*DXM/DEL - DEL)/6.0
+     2   +Y(I)*DXP/DEL + Y(I+1)*DXM/DEL
+      FP= FDP(I)*(-3.0*DXP*DXP/DEL + DEL)/6.0
+     1   +FDP(I+1)*(3.0*DXM*DXM/DEL - DEL)/6.0
+     2   -Y(I)/DEL + Y(I+1)/DEL
+      FPP=FDP(I)*DXP/DEL+FDP(I+1)*DXM/DEL
+      RETURN     
+      END
 
 C***********************************************************************
       subroutine READI(string, I)

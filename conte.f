@@ -568,7 +568,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
       common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     .                    rgamma, uspl, d2uspl, ydat
+     &                    rgamma, uspl, d2uspl, ydat
      
       common      /eig/   c
 c***********************************************************************
@@ -585,8 +585,8 @@ c
         yf(j) = yo(j+1)
       end do
       yf(4) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .        (0,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .        d2UU*yo(1)) 
+     &        (0,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &        d2UU*yo(1)) 
 
       return
       end
@@ -607,7 +607,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
       common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     .                    rgamma, uspl, d2uspl, ydat
+     &                    rgamma, uspl, d2uspl, ydat
      
       common      /eig/   c
 c***********************************************************************
