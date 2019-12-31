@@ -36,7 +36,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
       common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     .                    rgamma, uspl, d2uspl, ydat
+     &                    rgamma, uspl, d2uspl, ydat
      
       common      /eig/   c
 c***********************************************************************
@@ -155,9 +155,14 @@ C***********************************************************************
       real        aa, bb, cc, fdxr, fdxi, fdyr, fdyi
       logical     norm, eigfun 
       external    INPROD, FHOMO, FPART
+
+      real        errtol, maxcount, eigtol
 c
 c     initialize variables
 c
+      errtol = 1.0e-15
+      maxcount = 20
+      eigtol = 1.0e-15
       eigfun = .true.
 c
 c     set the normalization constraint
@@ -179,8 +184,8 @@ c
       icount = 1
       err = 1.0
       cm1 = c + 1.0
-      do while ((abs(err) .ge. 1.0e-15 .and. icount .le. 20) .and.
-     .          (abs(c-cm1) .ge. 1.0e-15) )
+      do while ((abs(err) .ge. errtol .and. icount .le. maxcount) .and.
+     &          (abs(c-cm1) .ge. eigtol) )
 c
 c       q = number of normalizations
 c       qend = total number of normalizations
@@ -234,16 +239,16 @@ c
                 aa = ABS(inprod(n, U(1,mi,k), U(1,mi,k)))
                 bb = ABS(inprod(n, U(1,mj,k), U(1,mj,k)))
                 cc = ABS(inprod(n, U(1,mi,k), U(1,mj,k)))
+#ifdef USE_ANALYTIC_INPROD
+                test = ACOS(MIN(1.0,ABS(cc)/SQRT(aa*bb)))
+#else
                 test = ACOS(ABS(cc)/SQRT(aa*bb))
-c               test = ACOS( MIN(1.0,ABS(cc)/SQRT(aa*bb)) )
-c               test = cc/SQRT(aa*bb)
-c               test = ACOS( ABS ( inprod(n, U(1,mi,k), U(1,mj,k)) /
-c      .                      SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
-c      .                            inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
+#endif
                 if (test .le. testalpha) norm = .true.
-c               if (test .gt. testalpha) norm = .true.
-c               write (*,*) k, mi, mj, test, testalpha, norm
-c               write (*,*) k, mi, mj, 180.0*test/pi,180.0*testalpha/pi, norm
+#ifdef VERBOSE
+                write (*,*) k, mi, mj, 180.0*test/pi, 
+     &                      180.0*testalpha/pi, norm
+#endif
               end if
             end do
           end do
@@ -252,9 +257,7 @@ c         Perform normalization
 c       
 c         if (norm .or. (k .eq. nstep) .or. (mod(k,10) .eq. 0) ) then
           if (norm .or. (k .eq. nstep)) then
-c         if (norm) then
             q = q + 1
-c           write (*,*) 'Normalization = ',q,' t = ',t,' k = ', k
             tq(q) = t
             if (k .eq. nstep) qend = q
 c
@@ -291,7 +294,7 @@ c
                   P(j,i,q) = 0.0
                   do s = i, j-1
                     P(j,i,q) = P(j,i,q)-inprod(n,U(1,j,k),z(1,s))/w(j)*
-     .                         P(s,i,q)
+     &                         P(s,i,q)
                   end do
                 end if
               end do
@@ -343,12 +346,14 @@ c
 c
 c       write out the current solutions
 c
-c        do k = 1, nstep
-c          t = to + h*k
-c          write (20,10) t,REAL(U(1,1,k)),AIMAG(U(1,1,k)),REAL(U(1,2,k)),
-c     .                    AIMAG(U(1,2,k)),REAL(v(1,k)),AIMAG(v(1,k))
-c 10       format (1x,7(e12.4,1x))
-c        end do
+#ifdef VERBOSE_SOLUTIONS
+        do k = 1, nstep
+          t = to + h*k
+          write (20,10) t,REAL(U(1,1,k)),AIMAG(U(1,1,k)),REAL(U(1,2,k)),
+     &                    AIMAG(U(1,2,k)),REAL(v(1,k)),AIMAG(v(1,k))
+ 10       format (1x,7(e12.4,1x))
+        end do
+#endif
 c
 c       check boundary conditions
 c
@@ -358,34 +363,32 @@ c         strictly enforce the zero BC
 c
           B(1,qend) = -U(1,2,nstep)/U(1,1,nstep)
           B(2,qend) = 1.0
-c         olderr = err
-c         err = U(2,1,nstep)*B(1,qend) + U(2,2,nstep)*B(2,qend)
         else
 c
 c         strictly enforce the zero slope BC
 c
           B(1,qend) =  1.0
           B(2,qend) = -U(2,1,nstep)/U(2,2,nstep)
-c         olderr = err
-c         err = U(1,1,nstep)*B(1,qend) + U(1,2,nstep)*B(2,qend)
         end if
+#ifdef CHECK_DETERMINATE
 c
-c       do i = 1, n 
-c         x(i) = yf(i) - v(i,nstep)
-c         do m = 1, n-r
-c           A(i,m) = U(i,m,nstep)
-c         end do
-c       end do
+c       Check the determinate (requires IMSL)
 c
-c       CALL WRCRN ('A', n, n-r, A, n, 0)
+        do i = 1, n 
+          x(i) = yf(i) - v(i,nstep)
+          do m = 1, n-r
+            A(i,m) = U(i,m,nstep)
+          end do
+        end do
+        CALL WRCRN ('A', n, n-r, A, n, 0)
 c
 c       compute the determinate
 c      
-c       call LFTCG( n-r, A, n, fac, n-r, ipvt)
-c       call LFDCG( n-r, fac, n-r, ipvt, det1, det2)   
-c       det = det1*10**det2
-c       write (*,*) 'det = ', det
-#if 1
+        call LFTCG( n-r, A, n, fac, n-r, ipvt)
+        call LFDCG( n-r, fac, n-r, ipvt, det1, det2)   
+        det = det1*10**det2
+        write (*,*) 'det = ', det
+#endif
         ctemp = c
         if (icount .eq. 1) then
           cm2 = c
@@ -408,7 +411,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           Bt = (2.*qt+1.)*err-(1.+qt)**2*errm1+qt**2*errm2
           Ct = (1.+qt)*err
           if ( ABS(Bt+SQRT(Bt**2-4.*At*Ct)) .gt.
-     .         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
+     &         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
              c = ctemp-(ctemp-cm1)*2.*Ct/(Bt+SQRT(Bt**2-4.*At*Ct))
           else
              c = ctemp-(ctemp-cm1)*2.*Ct/(Bt-SQRT(Bt**2-4.*At*Ct))
@@ -418,31 +421,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           errm2 = errm1
           errm1 = err
         end if
-#else
-        if (icount .eq. 1) then
-          cold = c
-          c = CMPLX( REAL(c)*.99, AIMAG(c) )
-        else
-          ctemp = c
-          if ( c-cold .ne. 0 ) then
-c         if ( olderr-err .ne. 0 ) then
-c
-c           compute the complex derivative
-c
-            fdxr =  REAL(err-olderr) /  REAL(c-cold)
-            fdxi = AIMAG(err-olderr) /  REAL(c-cold)
-c           fdyr =  REAL(err-olderr) / AIMAG(c-cold)
-c           fdyi = AIMAG(err-olderr) / AIMAG(c-cold)
-c           write (*,*) fdxr, fdxi, fdyr, fdyi
-            fd = CMPLX( fdxr, fdxi )
-            c = c - err/fd
-          else
-            write (*,*) 'divide by zero'
-            stop
-          end if
-          cold = ctemp
-        end if
-#endif
+
         write (*,30) icount, real(c), aimag(c), real(err), aimag(err)
   30    format (1x,i4,2(e17.8,e17.8,3x))
 
@@ -456,7 +435,6 @@ c
 c
 c     Second Pass to compute the eigenfunctions
 c
-c     write(*,*) 'q = ',q,' qend = ',qend
       if (eigfun) then
         vmax = 0.0
         k = nstep
@@ -647,8 +625,8 @@ c
         yf(j) = yo(j+1)
       end do
       yf(4) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .        (0,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .        d2UU*yo(1)) 
+     &        (0,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &        d2UU*yo(1)) 
 
       return
       end
@@ -670,7 +648,7 @@ c***********************************************************************
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
       common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     .                    rgamma, uspl, d2uspl, ydat
+     &                    rgamma, uspl, d2uspl, ydat
      
       common      /eig/   c
 c***********************************************************************

@@ -11,8 +11,9 @@ DEBUG = -O2 -ffpe-trap=invalid,zero,overflow
 #DEBUG = -g -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow
 #,zero,overflow,underflow,denormal
 #DEBUG = -g -fbacktrace -ffpe-trap=invalid
-FFLAGS = -cpp -ffixed-line-length-120 -fdefault-integer-8 -fdefault-real-8 -std=legacy $(DEBUG)
-F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 $(DEBUG)
+FFLAGS = -cpp -ffixed-line-length-120 -fdefault-integer-8 -fdefault-real-8 \
+				 -std=legacy $(DEFINES) $(DEBUG)
+F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 $(DEFINES) $(DEBUG)
 LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas
 #
 # Compilers

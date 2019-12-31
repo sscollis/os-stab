@@ -33,7 +33,7 @@ c
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (imax=20000)
+      parameter   (imax=50000)
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
@@ -69,7 +69,7 @@ c
       cr =  0.36413124E+00
       ci =  0.79527387E-02
       ymin = 0.0
-      ymax = 17.0
+      ymax = 20.0
 c
 c     ymin = 20.0 leads to an underflow and denormal, 17 is okay
 c
@@ -234,6 +234,15 @@ C***********************************************************************
       real        fdxr, fdxi, fdyr, fdyi
       logical     norm, eigfun
       external    INPROD, FHOMO, FPART, RKQC
+
+      real        errtol, maxcount, eigtol
+c
+c     initialize variables
+c
+      errtol = 1.0e-14
+      maxcount = 20
+      eigtol = 1.0e-14
+      eigfun = .true.
 c
 c     set the normalization constraint
 c
@@ -248,8 +257,8 @@ c
       icount = 1
       err = 1.0
       cm1 = c + 1.0
-      do while ((abs(err) .ge. 1.0e-12) .and. (icount .le. 20) .and.
-     .          (abs(c-cm1) .ge. 1.0e-12) )
+      do while ( ((abs(err) .ge. errtol) .or. (abs(c-cm1) .ge. eigtol)) 
+     &           .and. (icount .le. maxcount) ) 
         q = 0
         tq(0) = tf
 c
@@ -312,7 +321,8 @@ c
 c         Loop thru all homogeneous solutions
 c
           do m = 1, n-r
-             do i = 1, n
+#ifdef USE_ODEINT
+            do i = 1, n
               Utemp(i) = U(i,m,k-1)
             end do
             call ODEINT(Utemp,n,t+h,t,1.E-5,-h/2.,1.e-20,nok,nbad,
@@ -321,7 +331,9 @@ c           write (*,*) k, nok, nbad
             do i = 1, n
               U(i,m,k) = Utemp(i)
             end do
-c           call RK4SCOTT(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+#else
+            call RungeKutta4C(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+#endif
           end do
 c
 c         Test to see if normalization is required
@@ -486,14 +498,17 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
         write (*,30) icount,real(ctemp),aimag(ctemp),real(err),
      .               aimag(err)
   30    format (1x,i4,2(e17.8,e17.8,3x))
-
         icount = icount + 1
       end do
 c
 c.... Output Eigenvalue
 c      
+      icount = icount - 1
       write (*,40) real(ctemp), aimag(ctemp), qend
   40  format (/,'Eigenvalue = ',e17.8,1x,e17.8,2x,i5/)
+      write (*,45) icount, abs(err), abs(c-cm1)
+  45  format ('  Eigenvalue iterations = ', i5/,'  |error| = ',
+     &        es17.8/,'  |c-cm1| = ', es17.8/)
 c
 c     Second Pass to compute the eigenfunctions
 c
@@ -577,8 +592,46 @@ c
 #endif
       return
       end
+
 C***********************************************************************
-      subroutine RK4SCOTT(neq, yo, yf, to, h, FUNC)
+      subroutine RungeKutta4R(neq, yo, yf, to, h, FUNC)
+C***********************************************************************
+C
+C     Advance one time step using fourth order (real) Runge-Kutta
+C
+c***********************************************************************
+      external    FUNC
+      integer     neq
+      real        to, h
+      real        yo(neq), yf(neq)
+      real        f(neq), k1(neq), k2(neq), k3(neq), k4(neq), q(neq)
+      
+      call FUNC(neq, yo, to, f)
+      do j = 1 , neq
+        k1(j) = h*f(j)
+        q(j) = yo(j) + 0.5*k1(j)
+      end do
+      call FUNC(neq, q, to+0.5*h, f)
+      do j = 1 , neq
+        k2(j) = h*f(j)
+        q(j) = yo(j) + 0.5*k2(j)
+      end do
+      call FUNC(neq, q, to+0.5*h, f)
+      do j = 1 , neq
+        k3(j) = h*f(j)
+        q(j) = yo(j) + k3(j)
+      end do
+      call FUNC(neq, q, to+h, f)
+      do j = 1 , neq
+        k4(j) = h*f(j)
+        yf(j) = yo(j)+k1(j)/6.+(k2(j)+k3(j))/3.+k4(j)/6.
+      end do
+
+      return
+      end
+
+C***********************************************************************
+      subroutine RungeKutta4C(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
 C
 C     Advance one time step using fourth order (complex) Runge-Kutta
@@ -623,7 +676,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (imax=20000)
+      parameter   (imax=50000)
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
@@ -649,9 +702,6 @@ c
       do j = 1 , neq-1
         yf(j) = yo(j+1)
       end do
-c      yf(neq) = (1./alpha/Re*(2.*alpha**2*yo(3)-alpha**4*yo(1)) + 
-c     .          (0.,1.)*((UU-c)*(yo(3)-alpha**2*yo(1))-
-c     .          d2UU*yo(1)))*alpha*Re 
       yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
      .          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
      .          d2UU*yo(1)) 
@@ -668,7 +718,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (imax=20000)
+      parameter   (imax=50000)
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
@@ -711,7 +761,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (imax=20000)
+      parameter   (imax=50000)
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
@@ -746,13 +796,18 @@ c
 
         do i = 1, n
           y = ymin + float(i)*h
+#ifdef USE_ODEINT
           do j = 1, 3
             eta(j) = xi(j,i-1)
           end do
-          call ODEINTR(eta,3,y-h,y,1.E-7,h/2.,1.e-20,nok,nbad,BLASIUS,RKQCR)
+          call ODEINTR(eta,3,y-h,y,1.E-7,h/2.,1.e-20,nok,nbad,BLASIUS,
+     &                 RKQCR)
           do j = 1, 3
             xi(j,i) = eta(j)
           end do
+#else
+          call RungeKutta4R(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
+#endif 
         end do
 c
 c       Check f'(ymax)
@@ -826,7 +881,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (imax=20000)
+      parameter   (imax=50000)
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
