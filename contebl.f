@@ -332,7 +332,7 @@ c           write (*,*) k, nok, nbad
               U(i,m,k) = Utemp(i)
             end do
 #else
-            call RungeKutta4C(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+            call CRK4(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
 #endif
           end do
 c
@@ -594,7 +594,7 @@ c
       end
 
 C***********************************************************************
-      subroutine RungeKutta4R(neq, yo, yf, to, h, FUNC)
+      subroutine SRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
 C
 C     Advance one time step using fourth order (real) Runge-Kutta
@@ -631,7 +631,7 @@ c***********************************************************************
       end
 
 C***********************************************************************
-      subroutine RungeKutta4C(neq, yo, yf, to, h, FUNC)
+      subroutine CRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
 C
 C     Advance one time step using fourth order (complex) Runge-Kutta
@@ -806,7 +806,7 @@ c
             xi(j,i) = eta(j)
           end do
 #else
-          call RungeKutta4R(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
+          call SRK4(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
 #endif 
         end do
 c
@@ -850,7 +850,7 @@ c
       end do
       call SPLINE(n+1,ydat,u,uspl)
 c
-c     Use the spline result for the second derivative
+c     Use the spline result for the second derivative instead of FD
 c
       do i = 0, n
         d2u(i) = uspl(i)
@@ -872,6 +872,7 @@ c     close(10)
 
       return
       end
+
 C***********************************************************************
       subroutine BLASIUS(neq,xi,y,f)
 C***********************************************************************
@@ -902,9 +903,14 @@ c***********************************************************************
 
       return
       end
+
 C***********************************************************************
       SUBROUTINE SPLINE (N,X,Y,FDP)      
 C***********************************************************************
+C
+C.... Note: this routine is in the public domain and available
+C     at https://web.stanford.edu/class/me200c/
+C
 C-----THIS SUBROUTINE COMPUTES THE SECOND DERIVATIVES NEEDED 
 C-----IN CUBIC SPLINE INTERPOLATION.  THE INPUT DATA ARE:    
 C-----N = NUMBER OF DATA POINTS          
@@ -951,9 +957,14 @@ C-----WE NOW HAVE THE DESIRED DERIVATIVES SO WE RETURN TO THE
 C-----MAIN PROGRAM.  
       RETURN         
       END  
+
 C***********************************************************************
       SUBROUTINE SPEVAL (N,X,Y,FDP,XX,F) 
 C***********************************************************************
+C
+C.... Note: this routine is in the public domain and available
+C     at https://web.stanford.edu/class/me200c/
+C
 C-----THIS SUBROUTINE EVALUATES THE CUBIC SPLINE GIVEN       
 C-----THE DERIVATIVE COMPUTED BY SUBROUTINE SPLINE.          
 C-----THE INPUT PARAMETERS N,X,Y,FDP HAVE THE SAME 
@@ -976,282 +987,7 @@ C-----NOW EVALUATE THE CUBIC
      2   +Y(I)*DXP/DEL + Y(I+1)*DXM/DEL 
       RETURN        
       END 
-C***********************************************************************
-C23456789012345678901234567890123456789012345678901234567890123456789012
-C***********************************************************************
-      SUBROUTINE ODEINT(YSTART,NVAR,X1,X2,EPS,H1,HMIN,NOK,NBAD,
-     .                  DERIVS,RKQC)
-C***********************************************************************
-      PARAMETER (MAXSTP=10000, NMAX=10, TWO=2.0, ZERO=0.0, TINY=1.E-30)
-      
-      COMPLEX YP(10,200)
-      COMMON /PATH/ KMAX, KCOUNT, DXSAV, XP(200), YP
-      
-      COMPLEX YSTART(NVAR), YSCAL(NMAX), Y(NMAX), DYDX(NMAX)
-      EXTERNAL DERIVS, RKQC
 
-      X=X1
-      H=SIGN(H1,X2-X1)
-      NOK=0
-      NBAD=0
-      KOUNT=0
-      DO I = 1, NVAR
-        Y(I)=YSTART(I)
-      END DO
-      IF (KMAX.GT.0) XSAV=X-DXSAV*TWO
-      DO NSTP=1,MAXSTP
-        CALL DERIVS(NVAR, Y, X, DYDX)
-        DO I = 1, NVAR
-          YSCAL(I)=ABS(Y(I))+ABS(H*DYDX(I))+TINY
-        END DO
-        IF(KMAX.GT.0) THEN
-          IF(ABS(X-XSAV).GT.ABS(DXSAV)) THEN
-            IF(KOUNT.LT.KMAX-1) THEN
-              KOUNT=KOUNT+1
-              XP(KOUNT)=X
-              DO I = 1, NVAR
-                YP(I,KOUNT)=Y(I)
-              END DO
-              XSAV = X
-            END IF
-          END IF
-        END IF
-        IF((X+H-X2)*(X+H-X1).GT.ZERO) H=X2-X
-        CALL RKQC(Y,DYDX,NVAR,X,H,EPS,YSCAL,HDID,HNEXT,DERIVS)
-        IF(HDID.EQ.H)THEN
-          NOK=NOK+1
-        ELSE
-          NBAD=NBAD+1
-        END IF
-        IF((X-X2)*(X2-X1).GE.ZERO)THEN
-          DO I = 1, NVAR
-            YSTART(I)=Y(I)
-          END DO
-          IF(KMAX.NE.0)THEN
-            KOUNT=KOUNT+1
-            XP(KOUNT)=X
-            DO I = 1, NVAR
-              YP(I,KOUNT)=Y(I)
-            END DO
-          END IF
-          RETURN
-        END IF
-        IF(ABS(HNEXT).LT.HMIN) PAUSE 'Stepsize smaller than minimum'
-        H=HNEXT
-      END DO
-      PAUSE 'Too many steps'
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RKQC(Y,DYDX,N,X,HTRY,EPS,YSCAL,HDID,HNEXT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10,PGROW=-0.20,PSHRNK=-0.25,FCOR=1./15.,
-     .           ONE=1.,SAFETY=0.9,ERRCON=6.E-4)
-      EXTERNAL DERIVS
-      COMPLEX  Y(N),DYDX(N),YSCAL(N),YTEMP(NMAX),YSAV(NMAX),DYSAV(NMAX)
-      
-      XSAV=X
-      DO I = 1,N
-        YSAV(I)=Y(I)
-        DYSAV(I)=DYDX(I)
-      END DO
-      H=HTRY
-  1   HH=0.5*H
-      CALL RK4(YSAV,DYSAV,N,XSAV,HH,YTEMP,DERIVS)
-      X=XSAV+HH
-      CALL DERIVS(N, YTEMP, X, DYDX)
-      CALL RK4(YTEMP,DYDX,N,X,HH,Y,DERIVS)
-      X=XSAV+H
-      IF(X.EQ.XSAV) PAUSE 'Stepsize not significant in RKQC.'
-      CALL RK4(YSAV,DYSAV,N,XSAV,H,YTEMP,DERIVS)
-      ERRMAX=0.0
-      DO I = 1,N
-        YTEMP(I)=Y(I)-YTEMP(I)
-        ERRMAX = MAX(ERRMAX,ABS(YTEMP(I)/YSCAL(I)))
-      END DO
-      ERRMAX = ERRMAX/EPS
-      IF(ERRMAX.GT.ONE) THEN
-        H=SAFETY*H*(ERRMAX**PSHRNK)
-        GOTO 1
-      ELSE
-        HDID=H
-        IF(ERRMAX.GT.ERRCON) THEN
-          HNEXT=SAFETY*H*(ERRMAX**PGROW)
-        ELSE
-          HNEXT=4.*H
-        END IF
-      END IF
-      DO I = 1, N
-        Y(I) = Y(I)+YTEMP(I)*FCOR
-      END DO
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RK4(Y,DYDX,N,X,H,YOUT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10)
-      COMPLEX Y(N),DYDX(N),YOUT(N),YT(NMAX),DYT(NMAX),DYM(NMAX)
-      external derivs
-      
-      HH=H*0.5
-      H6=H/6.
-      XH=X+HH
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYDX(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYT)
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYT(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYM)
-      DO I = 1,N
-        YT(I)=Y(I)+H*DYM(I)
-        DYM(I)=DYT(I)+DYM(I)
-      END DO
-      CALL DERIVS(N, YT, X+H, DYT)
-      DO I = 1, N
-        YOUT(I) = Y(I)+H6*(DYDX(I)+DYT(I)+2.*DYM(I))
-      END DO
-      RETURN
-      END
-C***********************************************************************
-C23456789012345678901234567890123456789012345678901234567890123456789012
-C***********************************************************************
-      SUBROUTINE ODEINTR(YSTART,NVAR,X1,X2,EPS,H1,HMIN,NOK,NBAD,
-     .                   DERIVS,RKQCR)
-C***********************************************************************
-      PARAMETER (MAXSTP=10000, NMAX=10, TWO=2.0, ZERO=0.0, TINY=1.E-30)
-      
-      real    YP(10,200)
-      COMMON /PATHR/ KMAX, KCOUNT, DXSAV, XP(200), YP
-      
-      real    YSTART(NVAR), YSCAL(NMAX), Y(NMAX), DYDX(NMAX)
-      EXTERNAL DERIVS, RKQCR
-
-      X=X1
-      H=SIGN(H1,X2-X1)
-      NOK=0
-      NBAD=0
-      KOUNT=0
-      DO I = 1, NVAR
-        Y(I)=YSTART(I)
-      END DO
-      IF (KMAX.GT.0) XSAV=X-DXSAV*TWO
-      DO NSTP=1,MAXSTP
-        CALL DERIVS(NVAR, Y, X, DYDX)
-        DO I = 1, NVAR
-          YSCAL(I)=ABS(Y(I))+ABS(H*DYDX(I))+TINY
-        END DO
-        IF(KMAX.GT.0) THEN
-          IF(ABS(X-XSAV).GT.ABS(DXSAV)) THEN
-            IF(KOUNT.LT.KMAX-1) THEN
-              KOUNT=KOUNT+1
-              XP(KOUNT)=X
-              DO I = 1, NVAR
-                YP(I,KOUNT)=Y(I)
-              END DO
-              XSAV = X
-            END IF
-          END IF
-        END IF
-        IF((X+H-X2)*(X+H-X1).GT.ZERO) H=X2-X
-        CALL RKQCR(Y,DYDX,NVAR,X,H,EPS,YSCAL,HDID,HNEXT,DERIVS)
-        IF(HDID.EQ.H)THEN
-          NOK=NOK+1
-        ELSE
-          NBAD=NBAD+1
-        END IF
-        IF((X-X2)*(X2-X1).GE.ZERO)THEN
-          DO I = 1, NVAR
-            YSTART(I)=Y(I)
-          END DO
-          IF(KMAX.NE.0)THEN
-            KOUNT=KOUNT+1
-            XP(KOUNT)=X
-            DO I = 1, NVAR
-              YP(I,KOUNT)=Y(I)
-            END DO
-          END IF
-          RETURN
-        END IF
-        IF(ABS(HNEXT).LT.HMIN) PAUSE 'Stepsize smaller than minimum'
-        H=HNEXT
-      END DO
-      PAUSE 'Too many steps'
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RKQCR(Y,DYDX,N,X,HTRY,EPS,YSCAL,HDID,HNEXT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10,PGROW=-0.20,PSHRNK=-0.25,FCOR=1./15.,
-     .           ONE=1.,SAFETY=0.9,ERRCON=6.E-4)
-      EXTERNAL DERIVS
-      real     Y(N),DYDX(N),YSCAL(N),YTEMP(NMAX),YSAV(NMAX),DYSAV(NMAX)
-      
-      XSAV=X
-      DO I = 1,N
-        YSAV(I)=Y(I)
-        DYSAV(I)=DYDX(I)
-      END DO
-      H=HTRY
-  1   HH=0.5*H
-      CALL RK4R(YSAV,DYSAV,N,XSAV,HH,YTEMP,DERIVS)
-      X=XSAV+HH
-      CALL DERIVS(N, YTEMP, X, DYDX)
-      CALL RK4R(YTEMP,DYDX,N,X,HH,Y,DERIVS)
-      X=XSAV+H
-      IF(X.EQ.XSAV) PAUSE 'Stepsize not significant in RKQC.'
-      CALL RK4R(YSAV,DYSAV,N,XSAV,H,YTEMP,DERIVS)
-      ERRMAX=0.0
-      DO I = 1,N
-        YTEMP(I)=Y(I)-YTEMP(I)
-        ERRMAX = MAX(ERRMAX,ABS(YTEMP(I)/YSCAL(I)))
-      END DO
-      ERRMAX = ERRMAX/EPS
-      IF(ERRMAX.GT.ONE) THEN
-        H=SAFETY*H*(ERRMAX**PSHRNK)
-        GOTO 1
-      ELSE
-        HDID=H
-        IF(ERRMAX.GT.ERRCON) THEN
-          HNEXT=SAFETY*H*(ERRMAX**PGROW)
-        ELSE
-          HNEXT=4.*H
-        END IF
-      END IF
-      DO I = 1, N
-        Y(I) = Y(I)+YTEMP(I)*FCOR
-      END DO
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RK4R(Y,DYDX,N,X,H,YOUT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10)
-      real       Y(N),DYDX(N),YOUT(N),YT(NMAX),DYT(NMAX),DYM(NMAX)
-      external   derivs
-      
-      HH=H*0.5
-      H6=H/6.
-      XH=X+HH
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYDX(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYT)
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYT(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYM)
-      DO I = 1,N
-        YT(I)=Y(I)+H*DYM(I)
-        DYM(I)=DYT(I)+DYM(I)
-      END DO
-      CALL DERIVS(N, YT, X+H, DYT)
-      DO I = 1, N
-        YOUT(I) = Y(I)+H6*(DYDX(I)+DYT(I)+2.*DYM(I))
-      END DO
-      RETURN
-      END
 C***********************************************************************
       subroutine READI(string, I)
 C***********************************************************************
@@ -1287,6 +1023,7 @@ c
 
  100  return
       end
+
 C***********************************************************************
       subroutine READR(string, R)
 C***********************************************************************
