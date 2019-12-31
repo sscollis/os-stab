@@ -574,13 +574,16 @@ c***********************************************************************
       complex     yo(4), yf(4)
       real        t
       integer     neq
-      real        UU, d2UU
+      real        UU, dUU, d2UU
 c
 c     Get the velocity field
 c
+#ifdef USE_SPLINE
       call SPEVAL(n+1,ydat,U,Uspl,t,UU)
       call SPEVAL(n+1,ydat,d2U,d2Uspl,t,d2UU)
-
+#else
+      call profile(t,UU,dUU,d2UU)
+#endif
       do j = 1 , 3
         yf(j) = yo(j+1)
       end do
@@ -614,12 +617,16 @@ c***********************************************************************
       complex     yo(4), yf(4)
       real        t
       integer     neq
-      real        UU, d2UU
+      real        UU, dUU, d2UU
 c
 c     Get the velocity field
 c
+#ifdef USE_SPLINE
       call SPEVAL(n+1,ydat,U,Uspl,t,UU)
       call SPEVAL(n+1,ydat,d2U,d2Uspl,t,d2UU)
+#else
+      call PROFILE(t,UU,dUU,d2UU)
+#endif
 
       do j = 1 , 3
         yf(j) = yo(j+1)
@@ -635,8 +642,8 @@ C***********************************************************************
       subroutine SOLVE_BL
 C***********************************************************************
 C
-C     Integrate the boundary layer similarity equation to get velocity
-C     profile.
+C     Setup/solve for the velocity profile. In this case, the profile
+C     for an incompressible channel flow is analytic
 C
 c***********************************************************************
 c     Common variables
@@ -653,11 +660,11 @@ c***********************************************************************
       common      /eig/   c
 c***********************************************************************
       integer     i, j, k, p
-      real        xi(3,imax), f(3), eta(3), y, pi, us, d2us
+      real        xi(3,imax), f(3), eta(3), y, pi, us, dus, d2us
       real        k1(3), k2(3), k3(3), k4(3), err, x2old, f1old
 
       pi = acos(-1.0)
-c
+#ifdef USE_SPLINE
 c     Now assemble the velocity field
 c
       do i = 0, n
@@ -682,22 +689,59 @@ c
       end do
       call SPLINE(n+1,ydat,u,uspl)
       call SPLINE(n+1,ydat,d2u,d2uspl)
-
+c
+c     Write profile on 2x resolve mesh
+c
 c     open (10, FILE='chan.dat', ACTION='WRITE', FORM='FORMATTED')
       do i = 0, 2*n
-        y = ymin + i*h/2.
+        y = ymin + i*h/2.0
         call SPEVAL(n+1,ydat,u,uspl,y,us)
         call SPEVAL(n+1,ydat,d2u,d2uspl,y,d2us)
         write (10,10) y, us, d2us
   10    format (1x,5(ES16.8E3,1x))
       end do
 c     close(10)
-
+#else
+      do i = 0, n
+        y = ymin + i*h
+        call profile(y,u(i),dudy,d2u(i))
+      end do
+      do i = 0, 2*n
+        y = ymin + i*h/2.0
+        call profile(y,us,dus,d2us)
+        write (10,10) y, us, d2us
+  10    format (1x,5(ES16.8E3,1x))
+      end do
+#endif
       write (*,20)
   20  format (1x,'Channel velocity profile completed...',/)
 
       return
       end
+
+C***********************************************************************
+      subroutine profile(y,u,dudy,d2udy2)
+C***********************************************************************
+      real y, u, dudy, d2udy2
+C***********************************************************************
+      u      = 1.0 - y**2
+      dudy   = -2.0*y
+      d2udy2 = -2.0
+      return
+      end
+
+C***********************************************************************
+      subroutine set_profile(n,y,u,dudy,d2udy2)
+C***********************************************************************
+      integer     n
+      real        y(0:n), u(0:n), dudy(0:n), d2udy2(0:n)
+C***********************************************************************
+      do i = 0, n
+        call profile(y(i),u(i),dudy(i),d2udy2(i))
+      end do
+      return
+      end
+
 C***********************************************************************
       SUBROUTINE SPLINE (N,X,Y,FDP)      
 C***********************************************************************
