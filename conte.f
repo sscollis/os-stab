@@ -107,7 +107,7 @@ c
 c
 c     This really just makes a parabolic profile
 c
-      call SOLVE_BL
+      call SET_MEAN_FLOW 
 c
 c     set the boundary conditions
 c
@@ -432,6 +432,9 @@ c.... Output Eigenvalue
 c      
       write (*,40) real(ctemp), aimag(ctemp), qend
   40  format (/,'Eigenvalue = ',e17.8,1x,e17.8,2x,i5/)
+      write (*,45) icount, abs(err), abs(c-cm1)
+  45  format ('  Eigenvalue iterations = ', i5/,'  |error| = ',
+     &        es17.8/,'  |c-cm1| = ', es17.8/)
 c
 c     Second Pass to compute the eigenfunctions
 c
@@ -631,7 +634,7 @@ c
       end
 
 C***********************************************************************
-      subroutine SOLVE_BL
+      subroutine SET_MEAN_FLOW 
 C***********************************************************************
 C
 C     Setup/solve for the velocity profile. In this case, the profile
@@ -682,7 +685,7 @@ c     close(10)
       end
 
 C***********************************************************************
-      subroutine profile(y,u,dudy,d2udy2)
+      subroutine PROFILE(y,u,dudy,d2udy2)
 C***********************************************************************
       real y, u, dudy, d2udy2
 C***********************************************************************

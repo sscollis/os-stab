@@ -1,7 +1,7 @@
 #
 # Blasius boundary layer input file
 #
-nbl = 4000              # number of in profile
+nbl = 400              # number of in profile
 nstep = 4000            # number of integration points
 testalpha = 10.0        # Ortho. constraint (0 - 90 deg)
 Re = 580.0              # Reynolds number
