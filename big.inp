@@ -1,0 +1,18 @@
+#
+# Blasius boundary layer input file
+#
+nbl = 2000              # number of in profile
+nstep = 2000            # number of integration points
+testalpha = 10.0        # Ortho. constraint (0 - 90 deg)
+Re = 580.0              # Reynolds number
+beta = 0.0              # Falker-Skan parameter
+fp2 = 0.50              # Guess for profile slope
+alphar = 0.179          # Real part of alpha
+alphai = 0.0            # Imag part of alpha
+cr = 0.3641312400E+00   # Guess for Re(c)
+ci = 0.7952738700E-02   # Guess for Im(c)
+Ymin = 0.0              # Minimum Y
+Ymax = 30.0             # Maximum Y
+#
+# End of input file
+#
