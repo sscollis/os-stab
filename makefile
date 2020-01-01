@@ -70,6 +70,12 @@ contebl: contebl.o $(NR_OBJ)
 conteucbl: conteucbl.o $(NR_OBJ)
 	$(FC) $(LIB) conteucbl.o -o conteucbl
 
+orrsom: orrsom.o $(NR_OBJ)
+	$(FC) $(LIB) orrsom.o -o orrsom
+
+orrspace: orrspace.o $(NR_OBJ)
+	$(FC) $(LIB) orrspace.o -o orrspace
+
 orrncbl: orrncbl.o
 	$(FC) $(LIB) orrncbl.o -o orrncbl
 
