@@ -1,5 +1,5 @@
 c***********************************************************************
-      program Conte_uc_bl
+      program conte_uc_bl
 c***********************************************************************
 c 
 c     Purpose:  Solve the Orr-Sommerfeld equation using 4th order Runge-
@@ -19,20 +19,20 @@ c     Author:   Scott Collis
 c
 c     Date:     7-17-92
 c
-c     Revised:  9-18-92         Tabs are 8 characters
+c     Revised:  1-1-2020
 c
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -51,10 +51,10 @@ c***********************************************************************
 c
 c     Defaults
 c
-      nbl = 500
-      nstep = 500
+      nbl = 1000
+      nstep = 1000
       north = 50
-      testalpha = 0.0
+      testalpha = 10.0
       Re = 580.
       beta = 0.0
       alphar(1) = 0.179
@@ -62,7 +62,7 @@ c
       cr =  0.36413124E+00
       ci =  0.79527387E-02
       ymin = 0.0
-      ymax = 20.0
+      ymax = 17.0
       f2p = 0.5
       delta = 0.0
       deltauc = 0.0
@@ -70,7 +70,7 @@ c
       Uc = 0.0
       omega = 0
       saddle = 0
-      readbl = 1
+      readbl = 0
 c
 c     Input from keyboard
 c      
@@ -167,7 +167,7 @@ c
 c
 c     Check fixed dimensions
 c
-      if (nbl .gt. idim) then
+      if (nbl .gt. imax) then
         write (*,300) 
  300    format (/,/,1x,'N > Idim...Stopping',/,/)
         goto 210
@@ -253,13 +253,13 @@ c         write (*,*) uc
               call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,eigfun)
               eigenvalue(i) = c*alp(i)
 c             write (*,61)  real(alp(i)),aimag(alp(i)),real(eigenvalue(i))
-c    .                      ,aimag(eigenvalue(i))
-  61          format (1x,4(e17.10,4x))
+c    &                      ,aimag(eigenvalue(i))
+  61          format (1x,4(ES17.9E3,1x))
             end do
             A  = cmplx(0.,-1.)*(eigenvalue(2)-eigenvalue(1))
             B  = cmplx(0.,-1.)*(eigenvalue(3)-eigenvalue(1))
             alphas = (A*(alp(3)**2-alp(1)**2)-B*(alp(2)**2-alp(1)**2))/
-     .               (2.*B*(alp(1)-alp(2))-2.*A*(alp(1)-alp(3)))
+     &               (2.*B*(alp(1)-alp(2))-2.*A*(alp(1)-alp(3)))
             resid = alphas-alphasold
             if (k .eq. 1 .or. icount .gt. 4) then
               write (*,80) real(alphas), aimag(alphas), abs(resid)
@@ -273,7 +273,7 @@ c    .                      ,aimag(eigenvalue(i))
             alphai(3) = alphai(1) - delta
           end do
           write (*,90)  uc, real(eigenvalue(1)),aimag(eigenvalue(1)),
-     .                  real(alphas),aimag(alphas)
+     &                  real(alphas),aimag(alphas)
  90       format (1x,f6.4,2x,4(e17.10,4x))
           uc = uc - deltauc
         end do
@@ -282,7 +282,7 @@ c    .                      ,aimag(eigenvalue(i))
         alpha = cmplx (alphar(1), alphai(1))*SQRT(2.)
         call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,eigfun)
         write (*,61) real(alpha),aimag(alpha),real(c),
-     .               aimag(c)
+     &               aimag(c)
       end if
 c
 c     Read error
@@ -305,7 +305,6 @@ C
 c***********************************************************************
       complex     c, alpha
       real        Re
-
       common      /eig/   c, alpha, Re
 C***********************************************************************
       integer     i, m, q, r, s, mi, mj, qend, IPVT(n-r), icount, north
@@ -314,13 +313,22 @@ C***********************************************************************
       complex     U(n,n-r,0:nstep), P(n-r,n-r,0:nstep), z(n,n-r)
       complex     y(n,0:nstep), v(n,0:nstep), w(n-r), omega(n,0:nstep)
       complex     eta(n),A(n,n-r),x(n),FAC(n-r,n-r), det1, det
-      complex     olderr, INPROD, ut(n,n-r), fd, max, gamma
+      complex     olderr, INPROD, ut(n,n-r), fd, max, rgamma
       complex     cm1, cm2, errm1, errm2, qt, At, Bt, Ct, Utemp(n)
       real        aa, bb, cc
       real        test, testalpha, pi, det2, AI(n,n-r)
       real        fdxr, fdxi, fdyr, fdyi
       logical     norm, eigfun
       external    INPROD, FHOMO, FPART, RKQC
+
+      real        errtol, maxcount, eigtol
+c
+c     initialize variables
+c
+      errtol = 1.0e-14
+      maxcount = 20
+      eigtol = 1.0e-14
+      eigfun = .true.
 c
 c     set the normalization constraint
 c
@@ -333,15 +341,10 @@ c
 c     Begin the eigenvalue iteration loop
 c
       icount = 1
-      err = 1.
-      cm1 = 1000.
-
-c      do while ((abs(err) .ge. 1.0e-8) .and. (icount .le. 20) .and.
-c     .          (abs(c-cm1) .ge. 1.0e-12) )
-
-      do while ((abs(err) .ge. 1.0e-8) .and. (icount .le. 20) .and.
-     .          (abs(c-cm1) .ge. 1.0e-12) )
-
+      err = 1.0
+      cm1 = c + 1.0
+      do while ( ((abs(err) .ge. errtol) .or. (abs(c-cm1) .ge. eigtol))
+     &           .and. (icount .le. maxcount) )
         q = 0
         tq(0) = tf
 c
@@ -353,12 +356,12 @@ c
         U(3,1,0) = (alpha**2)*CEXP(-alpha*tf)
         U(4,1,0) = (-alpha**3)*CEXP(-alpha*tf)
         
-        gamma = SQRT(alpha**2+(0.,1.)*alpha*Re*(1.0-c))
+        rgamma = SQRT(alpha**2+(0.,1.)*alpha*Re*(1.0-c))
   
-        U(1,2,0) = CEXP(-gamma*tf)
-        U(2,2,0) = (-gamma)*CEXP(-gamma*tf)
-        U(3,2,0) = (gamma**2)*CEXP(-gamma*tf)
-        U(4,2,0) = (-gamma**3)*CEXP(-gamma*tf)
+        U(1,2,0) = CEXP(-rgamma*tf)
+        U(2,2,0) = (-rgamma)*CEXP(-rgamma*tf)
+        U(3,2,0) = (rgamma**2)*CEXP(-rgamma*tf)
+        U(4,2,0) = (-rgamma**3)*CEXP(-rgamma*tf)
 c
 c       Gram-Schmidt
 c
@@ -388,11 +391,13 @@ c
             U(i,m,k) = z(i,m)
           end do
         end do
-c       aa = ABS(inprod(n, U(1,1,k), U(1,1,k)))
-c       bb = ABS(inprod(n, U(1,2,k), U(1,2,k)))
-c       cc = ABS(inprod(n, U(1,1,k), U(1,2,k)))
-c       test = ACOS(cc/SQRT(aa*bb))*180./pi
-c       write (*,*) k, mi, mj, test
+#ifdef CHECK_ORTHOGONALITY
+        aa = ABS(inprod(n, U(1,1,k), U(1,1,k)))
+        bb = ABS(inprod(n, U(1,2,k), U(1,2,k)))
+        cc = ABS(inprod(n, U(1,1,k), U(1,2,k)))
+        test = ACOS(cc/SQRT(aa*bb))*180./pi
+        write (*,*) k, mi, mj, test
+#endif
 c
 c       Integrate the homo. and particular equations
 c      
@@ -402,30 +407,33 @@ c
 c         Loop thru all homogeneous solutions
 c
           do m = 1, n-r
-             do i = 1, n
+#ifdef USE_NR_ODEINT
+            do i = 1, n
               Utemp(i) = U(i,m,k-1)
             end do
             call ODEINT(Utemp,n,t+h,t,1.E-6,-h,1.e-20,nok,nbad,
-     .                  FHOMO,RKQC)
-c           write (*,*) k, nok, nbad
+     &                  FHOMO,RKQC)
             do i = 1, n
               U(i,m,k) = Utemp(i)
             end do
-c           call RK4SCOTT(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+#else
+            call CRK4(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+#endif
           end do
 c
 c         Test to see if normalization is required
 c
           norm = .false.
+          ta = pi*testalpha/180.0
           do mi = 1, n-r
             do mj = 1, n-r
               if (mi .ne. mj) then
                 aa = ABS(inprod(n, U(1,mi,k), U(1,mi,k)))
                 bb = ABS(inprod(n, U(1,mj,k), U(1,mj,k)))
                 cc = ABS(inprod(n, U(1,mi,k), U(1,mj,k)))
-                test = cc/SQRT(aa*bb)
-c               write (*,*) k, mi, mj, test
-                if (test .ge. testalpha) norm = .true.
+                test = ACOS(cc/SQRT(aa*bb))
+                if (test .lt. ta) norm = .true.
+c               write (*,*) k, mi, mj, test, testalpha, norm
               end if
             end do
           end do
@@ -473,7 +481,7 @@ c
                   P(j,i,q) = 0.0
                   do s = i, j-1
                     P(j,i,q) = P(j,i,q)-inprod(n,U(1,j,k),z(1,s))/w(j)*
-     .                         P(s,i,q)
+     &                         P(s,i,q)
                   end do
                 end if
               end do
@@ -481,26 +489,26 @@ c
 c
 c           Check the P matrix
 c
-c            if (.false.) then
-c             do i = 1, n
-c               do m = 1, n-r
-c               ut(i,m) = 0.0
-c                 do j = 1, n-r
-c                   ut(i,m) = ut(i,m) + U(i,j,k)*P(m,j,q)
-c                 end do
-c               end do
-c             end do
-c  
-c             do i = 1,n
-c               write (*,*) i,(ut(i,m), m = 1, n-r)
-c             end do
-c             write (*,*)
-c             do i = 1,n
-c               write (*,*) i,( z(i,m), m = 1, n-r)
-c             end do
-c             write (*,*)
-c             write (*,*)
-c            end if
+            if (.false.) then
+             do i = 1, n
+               do m = 1, n-r
+               ut(i,m) = 0.0
+                 do j = 1, n-r
+                   ut(i,m) = ut(i,m) + U(i,j,k)*P(m,j,q)
+                 end do
+               end do
+             end do
+  
+             do i = 1,n
+               write (*,*) i,(ut(i,m), m = 1, n-r)
+             end do
+             write (*,*)
+             do i = 1,n
+               write (*,*) i,( z(i,m), m = 1, n-r)
+             end do
+             write (*,*)
+             write (*,*)
+            end if
 c
 c           Now update the U matrix with the orthonormal values
 c       
@@ -515,23 +523,21 @@ c
 c
 c       check boundary conditions
 c
-c        if (.true.) then
+        if (.true.) then
 c
 c         strictly enforce the zero BC
 c
           B(1,qend) = -U(1,2,nstep)/U(1,1,nstep)
           B(2,qend) = 1.0
-c         olderr = err
-c         err = U(2,1,nstep)*B(1,qend) + U(2,2,nstep)*B(2,qend)
-c        else
+        else
 c
 c         strictly enforce the zero slope BC
 c
-c         B(1,qend) =  1.0
-c         B(2,qend) = -U(2,1,nstep)/U(2,2,nstep)
-c         olderr = err
-c         err = U(1,1,nstep)*B(1,qend) + U(1,2,nstep)*B(2,qend)
-c        end if
+          B(1,qend) =  1.0
+          B(2,qend) = -U(2,1,nstep)/U(2,2,nstep)
+          olderr = err
+          err = U(1,1,nstep)*B(1,qend) + U(1,2,nstep)*B(2,qend)
+        end if
         
         ctemp = c
         if (icount .eq. 1) then
@@ -555,7 +561,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           Bt = (2.*qt+1.)*err-(1.+qt)**2*errm1+qt**2*errm2
           Ct = (1.+qt)*err
           if ( ABS(Bt+SQRT(Bt**2-4.*At*Ct)) .gt. 
-     .         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
+     &         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
              c = ctemp-(ctemp-cm1)*2.*Ct/(Bt+SQRT(Bt**2-4.*At*Ct))
           else
              c = ctemp-(ctemp-cm1)*2.*Ct/(Bt-SQRT(Bt**2-4.*At*Ct))
@@ -565,10 +571,9 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           errm2 = errm1
           errm1 = err
         end if
-c        write (*,30) icount,real(ctemp),aimag(ctemp),real(err),
-c     .               aimag(err)
+        write (*,30) icount,real(ctemp),aimag(ctemp),real(err),
+     &               aimag(err)
   30    format (1x,i4,2(e17.8,e17.8,3x))
-
         icount = icount + 1
       end do
       
@@ -576,11 +581,22 @@ c     .               aimag(err)
 c
 c       Second Pass
 c
-        write (*,40) real(c),aimag(c),qend
+        icount = icount - 1
+        write (*,40) real(ctemp), aimag(ctemp), qend
   40    format (/,'Eigenvalue = ',e17.8,1x,e17.8,2x,i5/)
+        write (*,45) icount, abs(err), abs(c-cm1)
+  45    format ('  Eigenvalue iterations = ', i5/,'  |error| = ',
+     &          es17.8/,'  |c-cm1| = ', es17.8/)
 
         q = qend
         max = 0.0
+        k = nstep
+        do i = 1, n
+          y(i,k) = v(i,k)
+          do m = 1, n-r
+            y(i,k) = y(i,k) + U(i,m,k)*B(m,q)
+          end do
+        end do
         do m = 1, n-r
           B(m,q-1) = 0.0
           do j = 1, n-r
@@ -629,7 +645,7 @@ c
           write (12,20) t, REAL(y(2,k)/max),AIMAG(y(2,k)/max)
           write (13,20) t, REAL(y(3,k)/max),AIMAG(y(3,k)/max)
           write (14,20) t, REAL(y(4,k)/max),AIMAG(y(4,k)/max)
-  20      format ( 1x, 3(e17.8,2x) )
+  20      format ( 1x, 3(ES16.8E3,1x) )
         end do
       end if
 
@@ -646,13 +662,21 @@ c***********************************************************************
       complex     v1(n), v2(n)
       complex     INPROD
       integer     n, i
- 
+#if USE_ANALYTIC_INPROD
+c
+c     Lets define a different complex inner product so that the
+c     iteration is analytic
+c
       INPROD = 0.0
       do i = 1, n
-c       INPROD = INPROD + v1(i)*conjg(v2(i))
         INPROD = INPROD + v1(i)*v2(i)
       end do
-      
+#else
+      INPROD = 0.0
+      do i = 1, n
+        INPROD = INPROD + v1(i)*conjg(v2(i))
+      end do
+#endif
       return
       end
 C***********************************************************************
@@ -664,15 +688,15 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -685,16 +709,18 @@ c***********************************************************************
 c
 c     Get the velocity field
 c
+#ifdef USE_SPINE_DERIVATIVE 
       call SPEVAL(nbl+1,ydat,U,Uspl,t,UU)
       call SPEVAL(nbl+1,ydat,d2U,d2Uspl,t,d2UU)
-
+#else
+      call SPDER(nbl+1,ydat,U,Uspl,t,UU,dUU,d2UU)
+#endif
       do j = 1 , neq-1
         yf(j) = yo(j+1)
       end do
-      yf(neq) = (1./alpha/Re*(2.*alpha**2*yo(3)-alpha**4*yo(1)) + 
-     .          (0.,1.)*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)))*alpha*Re 
-
+      yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) +
+     &          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &          d2UU*yo(1))
       return
       end
 
@@ -707,15 +733,15 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -728,16 +754,18 @@ c***********************************************************************
 c
 c     Get the velocity field
 c
+#ifdef USE_SPINE_DERIVATIVE 
       call SPEVAL(nbl+1,ydat,U,Uspl,t,UU)
       call SPEVAL(nbl+1,ydat,d2U,d2Uspl,t,d2UU)
-
+#else
+      call SPDER(nbl+1,ydat,U,Uspl,t,UU,dUU,d2UU)
+#endif
       do j = 1 , neq-1
         yf(j) = yo(j+1)
       end do
       yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)) 
-
+     &          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &          d2UU*yo(1)) 
       return
       end
 
@@ -750,15 +778,15 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -798,20 +826,20 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
       integer     i, j, k, p
-      real        xi(3,0:idim), f(3), eta(3), y
+      real        xi(3,0:imax), f(3), eta(3), y
       real        k1(3), k2(3), k3(3), k4(3), err, x2old, f1old
       external    BLASIUS, RKQCR
       
@@ -834,13 +862,18 @@ c
 
         do i = 1, nbl
           y = ymin + float(i)*h
+#ifdef USE_NR_ODEINT
           do j = 1, 3
             eta(j) = xi(j,i-1)
           end do
-          call ODEINTR(eta,3,y-h,y,1.E-7,h/2.,1.e-20,nok,nbad,BLASIUS,RKQCR)
+          call ODEINTR(eta,3,y-h,y,1.E-7,h/2.,1.e-20,nok,nbad,
+     &                 BLASIUS,RKQCR)
           do j = 1, 3
             xi(j,i) = eta(j)
           end do
+#else
+          call SRK4(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
+#endif
         end do
 c
 c       Check f'(ymax)
@@ -851,7 +884,7 @@ c
         else
           xi3temp = xi(3,0)
           xi(3,0) = xi(3,0)+((xi3old-xi(3,0))/(xi2old-xi(2,nbl)))*
-     .              (1.0 - xi(2,nbl))
+     &              (1.0 - xi(2,nbl))
           xi3old = xi3temp
         end if
         p = p + 1
@@ -874,7 +907,7 @@ c      do i = 1, nbl-1
 c        d2u(i) = (u(i+1)-2*u(i)+u(i-1))/(h)**2
 c      end do
 c      d2u(0) = (-u(4)+4.*u(3)-5.*u(2)+2.*u(1))/(h)**2
-c      d2u(n) = (2.*u(nbl)-5.*u(nbl-1)+4.*u(nbl-2)-u(nbl-3))/(h)**2
+c      d2u(nbl) = (2.*u(nbl)-5.*u(nbl-1)+4.*u(nbl-2)-u(nbl-3))/(h)**2
       
       call SHIFT_BL
 
@@ -893,15 +926,15 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -926,7 +959,7 @@ c
         call SPEVAL(nbl+1,ydat,u,uspl,y,us)
         call SPEVAL(nbl+1,ydat,d2u,d2uspl,y,d2us)
         write (10,10) y, us, d2us, u(i), d2u(i)
-  10    format (1x,5(E16.5E4,1x))
+  10    format (1x,5(ES16.8E3,1x))
       end do
 
       return
@@ -940,15 +973,15 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=20000)
+      parameter   (imax=20000)
       integer     nbl
-      complex     alpha, c, gamma
-      real        U(0:idim), d2U(0:idim), Re, ymin, ymax, h, beta, uc
-      real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
-      real        Uorg(0:idim)
+      complex     alpha, c, rgamma
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta, uc
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+      real        Uorg(0:imax)
 
-      common      /data/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
-     .                    gamma, beta, uspl, d2uspl, ydat, Uorg
+      common      /mean/  nbl, u, d2u, ymin, ymax, h, f2p, uc,
+     &                    rgamma, beta, uspl, d2uspl, ydat, Uorg
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -965,6 +998,10 @@ c***********************************************************************
 C***********************************************************************
       SUBROUTINE SPLINE (N,X,Y,FDP)      
 C***********************************************************************
+C
+C.... Note: this routine is in the public domain and available
+C     at https://web.stanford.edu/class/me200c/
+C
 C-----THIS SUBROUTINE COMPUTES THE SECOND DERIVATIVES NEEDED 
 C-----IN CUBIC SPLINE INTERPOLATION.  THE INPUT DATA ARE:    
 C-----N = NUMBER OF DATA POINTS          
@@ -1027,12 +1064,7 @@ C-----F =  THE INTERPOLATED RESULT
 c
 c-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.          
 c
-c     This is really a stupid way of searching
-c
-c      NM1 = N - 1    
-c      DO 1 I=1,NM1   
-c      IF (XX.LE.X(I+1)) GO TO 10         
-c    1 CONTINUE       
+#if USE_NR_HUNT
 c
 c     Search using bisection with a good guess
 c
@@ -1045,6 +1077,15 @@ c
         call HUNT (X,N,XX,I)
       END IF
       IOLD = I
+#else
+c
+c     This is really a slow way of searching
+c
+      NM1 = N - 1    
+      DO 1 I=1,NM1   
+      IF (XX.LE.X(I+1)) GO TO 10         
+    1 CONTINUE       
+#endif
 C-----NOW EVALUATE THE CUBIC   
    10 DXM = XX - X(I)          
       DXP = X(I+1) - XX        
@@ -1054,328 +1095,42 @@ C-----NOW EVALUATE THE CUBIC
      2   +Y(I)*DXP/DEL + Y(I+1)*DXM/DEL 
       RETURN        
       END 
+
 C***********************************************************************
-      SUBROUTINE HUNT(XX,N,X,JLO)
+      SUBROUTINE SPDER(N,X,Y,FDP,XX,F,FP,FPP)
 C***********************************************************************
 C
-C     TAKEN FROM NUMERICAL RECIPES (P. 91)
+C.... Note: this routine is in the public domain and available
+C     at https://web.stanford.edu/class/me200c/
 C
-C***********************************************************************
-      REAL XX(N)
-      LOGICAL ASCND
-      ASCND=XX(N).GT.XX(1)
-      IF(JLO.LE.0.OR.JLO.GT.N)THEN
-        JLO=0
-        JHI=N+1
-        GO TO 3
-      END IF
-      INC = 1
-      IF(X.GE.XX(JLO).EQV.ASCND)THEN
- 1      JHI=JLO+INC
-        IF(JHI.GT.N)THEN
-          JHI=N+1
-        ELSE IF (X.GE.XX(JHI).EQV.ASCND) THEN
-          JLO=JHI
-          INC=INC+INC
-          GO TO 1
-        END IF
-      ELSE
-        JHI=JLO
- 2      JLO=JHI-INC
-        IF(JLO.LT.1)THEN
-          JLO=0
-        ELSE IF(X.LT.XX(JLO).EQV.ASCND)THEN
-          JHI=JLO
-          INC=INC+INC
-          GO TO 2
-        END IF
-      END IF
-      
- 3    IF(JHI-JLO.EQ.1)RETURN
-      JM=(JHI+JLO)/2
-      IF(X.GT.XX(JM).EQV.ASCND)THEN
-        JLO=JM
-      ELSE
-        JHI=JM
-      END IF
-      GO TO 3
-      END 
-C***********************************************************************
-C23456789012345678901234567890123456789012345678901234567890123456789012
-C***********************************************************************
-      SUBROUTINE ODEINT(YSTART,NVAR,X1,X2,EPS,H1,HMIN,NOK,NBAD,
-     .                  DERIVS,RKQC)
-C***********************************************************************
-      PARAMETER (MAXSTP=10000, NMAX=10, TWO=2.0, ZERO=0.0, TINY=1.E-30)
-      
-      COMPLEX YP(10,200)
-      COMMON /PATH/ KMAX, KCOUNT, DXSAV, XP(200), YP
-      
-      COMPLEX YSTART(NVAR), YSCAL(NMAX), Y(NMAX), DYDX(NMAX)
-      EXTERNAL DERIVS, RKQC
+C-----THIS SUBROUTINE EVALUATES THE CUBIC SPLINE GIVEN
+C-----THE 2ND DERIVATIVE COMPUTED BY SUBROUTINE SPLINE.
+C-----THE INPUT PARAMETERS N,X,Y,FDP HAVE THE SAME
+C-----MEANING AS IN SPLINE.
+C-----XX = VALUE OF INDEPENDENT VARIABLE FOR WHICH
+C-----     AN INTERPOLATED VALUE IS REQUESTED
+C-----F =  THE INTERPOLATED RESULT
+C-----FP = THE INTERPOLATED DERIVATIVE RESULT
+      DIMENSION X(N),Y(N),FDP(N)
+C-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.
+      NM1 = N - 1
+      DO 1 I=1,NM1
+      IF (XX.LE.X(I+1)) GO TO 10
+    1 CONTINUE
+C-----NOW EVALUATE THE CUBIC
+   10 DXM = XX - X(I)
+      DXP = X(I+1) - XX
+      DEL = X(I+1) - X(I)
+      F = FDP(I)*DXP*(DXP*DXP/DEL - DEL)/6.0
+     1   +FDP(I+1)*DXM*(DXM*DXM/DEL - DEL)/6.0
+     2   +Y(I)*DXP/DEL + Y(I+1)*DXM/DEL
+      FP= FDP(I)*(-3.0*DXP*DXP/DEL + DEL)/6.0
+     1   +FDP(I+1)*(3.0*DXM*DXM/DEL - DEL)/6.0
+     2   -Y(I)/DEL + Y(I+1)/DEL
+      FPP=FDP(I)*DXP/DEL+FDP(I+1)*DXM/DEL
+      RETURN
+      END
 
-      X=X1
-      H=SIGN(H1,X2-X1)
-      NOK=0
-      NBAD=0
-      KOUNT=0
-      DO I = 1, NVAR
-        Y(I)=YSTART(I)
-      END DO
-      IF (KMAX.GT.0) XSAV=X-DXSAV*TWO
-      DO NSTP=1,MAXSTP
-        CALL DERIVS(NVAR, Y, X, DYDX)
-        DO I = 1, NVAR
-          YSCAL(I)=ABS(Y(I))+ABS(H*DYDX(I))+TINY
-        END DO
-        IF(KMAX.GT.0) THEN
-          IF(ABS(X-XSAV).GT.ABS(DXSAV)) THEN
-            IF(KOUNT.LT.KMAX-1) THEN
-              KOUNT=KOUNT+1
-              XP(KOUNT)=X
-              DO I = 1, NVAR
-                YP(I,KOUNT)=Y(I)
-              END DO
-              XSAV = X
-            END IF
-          END IF
-        END IF
-        IF((X+H-X2)*(X+H-X1).GT.ZERO) H=X2-X
-        CALL RKQC(Y,DYDX,NVAR,X,H,EPS,YSCAL,HDID,HNEXT,DERIVS)
-        IF(HDID.EQ.H)THEN
-          NOK=NOK+1
-        ELSE
-          NBAD=NBAD+1
-        END IF
-        IF((X-X2)*(X2-X1).GE.ZERO)THEN
-          DO I = 1, NVAR
-            YSTART(I)=Y(I)
-          END DO
-          IF(KMAX.NE.0)THEN
-            KOUNT=KOUNT+1
-            XP(KOUNT)=X
-            DO I = 1, NVAR
-              YP(I,KOUNT)=Y(I)
-            END DO
-          END IF
-          RETURN
-        END IF
-        IF(ABS(HNEXT).LT.HMIN) PAUSE 'Stepsize smaller than minimum'
-        H=HNEXT
-      END DO
-      PAUSE 'Too many steps'
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RKQC(Y,DYDX,N,X,HTRY,EPS,YSCAL,HDID,HNEXT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10,PGROW=-0.20,PSHRNK=-0.25,FCOR=1./15.,
-     .           ONE=1.,SAFETY=0.9,ERRCON=6.E-4)
-      EXTERNAL DERIVS
-      COMPLEX  Y(N),DYDX(N),YSCAL(N),YTEMP(NMAX),YSAV(NMAX),DYSAV(NMAX)
-      
-      XSAV=X
-      DO I = 1,N
-        YSAV(I)=Y(I)
-        DYSAV(I)=DYDX(I)
-      END DO
-      H=HTRY
-  1   HH=0.5*H
-      CALL RK4(YSAV,DYSAV,N,XSAV,HH,YTEMP,DERIVS)
-      X=XSAV+HH
-      CALL DERIVS(N, YTEMP, X, DYDX)
-      CALL RK4(YTEMP,DYDX,N,X,HH,Y,DERIVS)
-      X=XSAV+H
-      IF(X.EQ.XSAV) PAUSE 'Stepsize not significant in RKQC.'
-      CALL RK4(YSAV,DYSAV,N,XSAV,H,YTEMP,DERIVS)
-      ERRMAX=0.0
-      DO I = 1,N
-        YTEMP(I)=Y(I)-YTEMP(I)
-        ERRMAX = MAX(ERRMAX,ABS(YTEMP(I)/YSCAL(I)))
-      END DO
-      ERRMAX = ERRMAX/EPS
-      IF(ERRMAX.GT.ONE) THEN
-        H=SAFETY*H*(ERRMAX**PSHRNK)
-        GOTO 1
-      ELSE
-        HDID=H
-        IF(ERRMAX.GT.ERRCON) THEN
-          HNEXT=SAFETY*H*(ERRMAX**PGROW)
-        ELSE
-          HNEXT=4.*H
-        END IF
-      END IF
-      DO I = 1, N
-        Y(I) = Y(I)+YTEMP(I)*FCOR
-      END DO
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RK4(Y,DYDX,N,X,H,YOUT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10)
-      COMPLEX Y(N),DYDX(N),YOUT(N),YT(NMAX),DYT(NMAX),DYM(NMAX)
-      external derivs
-      
-      HH=H*0.5
-      H6=H/6.
-      XH=X+HH
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYDX(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYT)
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYT(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYM)
-      DO I = 1,N
-        YT(I)=Y(I)+H*DYM(I)
-        DYM(I)=DYT(I)+DYM(I)
-      END DO
-      CALL DERIVS(N, YT, X+H, DYT)
-      DO I = 1, N
-        YOUT(I) = Y(I)+H6*(DYDX(I)+DYT(I)+2.*DYM(I))
-      END DO
-      RETURN
-      END
-C***********************************************************************
-C23456789012345678901234567890123456789012345678901234567890123456789012
-C***********************************************************************
-      SUBROUTINE ODEINTR(YSTART,NVAR,X1,X2,EPS,H1,HMIN,NOK,NBAD,
-     .                   DERIVS,RKQCR)
-C***********************************************************************
-      PARAMETER (MAXSTP=10000, NMAX=10, TWO=2.0, ZERO=0.0, TINY=1.E-30)
-      
-      real    YP(10,200)
-      COMMON /PATHR/ KMAX, KCOUNT, DXSAV, XP(200), YP
-      
-      real    YSTART(NVAR), YSCAL(NMAX), Y(NMAX), DYDX(NMAX)
-      EXTERNAL DERIVS, RKQCR
-
-      X=X1
-      H=SIGN(H1,X2-X1)
-      NOK=0
-      NBAD=0
-      KOUNT=0
-      DO I = 1, NVAR
-        Y(I)=YSTART(I)
-      END DO
-      IF (KMAX.GT.0) XSAV=X-DXSAV*TWO
-      DO NSTP=1,MAXSTP
-        CALL DERIVS(NVAR, Y, X, DYDX)
-        DO I = 1, NVAR
-          YSCAL(I)=ABS(Y(I))+ABS(H*DYDX(I))+TINY
-        END DO
-        IF(KMAX.GT.0) THEN
-          IF(ABS(X-XSAV).GT.ABS(DXSAV)) THEN
-            IF(KOUNT.LT.KMAX-1) THEN
-              KOUNT=KOUNT+1
-              XP(KOUNT)=X
-              DO I = 1, NVAR
-                YP(I,KOUNT)=Y(I)
-              END DO
-              XSAV = X
-            END IF
-          END IF
-        END IF
-        IF((X+H-X2)*(X+H-X1).GT.ZERO) H=X2-X
-        CALL RKQCR(Y,DYDX,NVAR,X,H,EPS,YSCAL,HDID,HNEXT,DERIVS)
-        IF(HDID.EQ.H)THEN
-          NOK=NOK+1
-        ELSE
-          NBAD=NBAD+1
-        END IF
-        IF((X-X2)*(X2-X1).GE.ZERO)THEN
-          DO I = 1, NVAR
-            YSTART(I)=Y(I)
-          END DO
-          IF(KMAX.NE.0)THEN
-            KOUNT=KOUNT+1
-            XP(KOUNT)=X
-            DO I = 1, NVAR
-              YP(I,KOUNT)=Y(I)
-            END DO
-          END IF
-          RETURN
-        END IF
-        IF(ABS(HNEXT).LT.HMIN) PAUSE 'Stepsize smaller than minimum'
-        H=HNEXT
-      END DO
-      PAUSE 'Too many steps'
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RKQCR(Y,DYDX,N,X,HTRY,EPS,YSCAL,HDID,HNEXT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10,PGROW=-0.20,PSHRNK=-0.25,FCOR=1./15.,
-     .           ONE=1.,SAFETY=0.9,ERRCON=6.E-4)
-      EXTERNAL DERIVS
-      real     Y(N),DYDX(N),YSCAL(N),YTEMP(NMAX),YSAV(NMAX),DYSAV(NMAX)
-      
-      XSAV=X
-      DO I = 1,N
-        YSAV(I)=Y(I)
-        DYSAV(I)=DYDX(I)
-      END DO
-      H=HTRY
-  1   HH=0.5*H
-      CALL RK4R(YSAV,DYSAV,N,XSAV,HH,YTEMP,DERIVS)
-      X=XSAV+HH
-      CALL DERIVS(N, YTEMP, X, DYDX)
-      CALL RK4R(YTEMP,DYDX,N,X,HH,Y,DERIVS)
-      X=XSAV+H
-      IF(X.EQ.XSAV) PAUSE 'Stepsize not significant in RKQC.'
-      CALL RK4R(YSAV,DYSAV,N,XSAV,H,YTEMP,DERIVS)
-      ERRMAX=0.0
-      DO I = 1,N
-        YTEMP(I)=Y(I)-YTEMP(I)
-        ERRMAX = MAX(ERRMAX,ABS(YTEMP(I)/YSCAL(I)))
-      END DO
-      ERRMAX = ERRMAX/EPS
-      IF(ERRMAX.GT.ONE) THEN
-        H=SAFETY*H*(ERRMAX**PSHRNK)
-        GOTO 1
-      ELSE
-        HDID=H
-        IF(ERRMAX.GT.ERRCON) THEN
-          HNEXT=SAFETY*H*(ERRMAX**PGROW)
-        ELSE
-          HNEXT=4.*H
-        END IF
-      END IF
-      DO I = 1, N
-        Y(I) = Y(I)+YTEMP(I)*FCOR
-      END DO
-      RETURN
-      END
-C***********************************************************************
-      SUBROUTINE RK4R(Y,DYDX,N,X,H,YOUT,DERIVS)
-C***********************************************************************
-      PARAMETER (NMAX=10)
-      real       Y(N),DYDX(N),YOUT(N),YT(NMAX),DYT(NMAX),DYM(NMAX)
-      external   derivs
-      
-      HH=H*0.5
-      H6=H/6.
-      XH=X+HH
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYDX(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYT)
-      DO I = 1, N
-        YT(I)=Y(I)+HH*DYT(I)
-      END DO
-      CALL DERIVS(N, YT, XH, DYM)
-      DO I = 1,N
-        YT(I)=Y(I)+H*DYM(I)
-        DYM(I)=DYT(I)+DYM(I)
-      END DO
-      CALL DERIVS(N, YT, X+H, DYT)
-      DO I = 1, N
-        YOUT(I) = Y(I)+H6*(DYDX(I)+DYT(I)+2.*DYM(I))
-      END DO
-      RETURN
-      END
 C***********************************************************************
       subroutine READI(string, I)
 C***********************************************************************
@@ -1448,17 +1203,17 @@ c
  100  return
       end
 C***********************************************************************
-      subroutine RK4SCOTT(neq, yo, yf, to, h, FUNC)
+      subroutine SRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
 C
-C     Advance one time step using fourth order (complex) Runge-Kutta
+C     Advance one time step using fourth order (real) Runge-Kutta
 C
 c***********************************************************************
       external    FUNC
       integer     neq
       real        to, h
-      complex     yo(neq), yf(neq)
-      complex     f(neq), k1(neq), k2(neq), k3(neq), k4(neq), q(neq)
+      real        yo(neq), yf(neq)
+      real        f(neq), k1(neq), k2(neq), k3(neq), k4(neq), q(neq)
       
       call FUNC(neq, yo, to, f)
       do j = 1 , neq
@@ -1484,5 +1239,39 @@ c***********************************************************************
       return
       end
 
+C***********************************************************************
+      subroutine CRK4(neq, yo, yf, to, h, FUNC)
+C***********************************************************************
+C
+C     Advance one time step using fourth order (complex) Runge-Kutta
+C
+c***********************************************************************
+      external    FUNC
+      integer     neq
+      real        to, h
+      complex     yo(neq), yf(neq)
+      complex     f(neq), k1(neq), k2(neq), k3(neq), k4(neq), q(neq)
 
-      
+      call FUNC(neq, yo, to, f)
+      do j = 1 , neq
+        k1(j) = h*f(j)
+        q(j) = yo(j) + 0.5*k1(j)
+      end do
+      call FUNC(neq, q, to+0.5*h, f)
+      do j = 1 , neq
+        k2(j) = h*f(j)
+        q(j) = yo(j) + 0.5*k2(j)
+      end do
+      call FUNC(neq, q, to+0.5*h, f)
+      do j = 1 , neq
+        k3(j) = h*f(j)
+        q(j) = yo(j) + k3(j)
+      end do
+      call FUNC(neq, q, to+h, f)
+      do j = 1 , neq
+        k4(j) = h*f(j)
+        yf(j) = yo(j)+k1(j)/6.+(k2(j)+k3(j))/3.+k4(j)/6.
+      end do
+
+      return
+      end

@@ -34,15 +34,15 @@ c***********************************************************************
 c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
-      integer     n
+      integer     nbl
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /setup/  n, u, d2u, ymin, ymax, h, f2p,
-     &                     rgamma, beta, uspl, d2uspl, ydat
+      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
+     &                   rgamma, beta, uspl, d2uspl, ydat
      
-      common      /eig/   c, alpha, Re
+      common      /eig/  c, alpha, Re
 c***********************************************************************
       parameter (neq=4, inunit=20)
       complex   bc1(neq), bc2(neq)
@@ -55,8 +55,8 @@ c***********************************************************************
 c
 c     Defaults
 c
-      n = 2000
-      nstep = 2000
+      nbl = 1000
+      nstep = 1000
       north = 50
 c
 c     testalpha = [0,90] degrees (10 deg seems good)
@@ -69,7 +69,7 @@ c
       cr =  0.36413124E+00
       ci =  0.79527387E-02
       ymin = 0.0
-      ymax = 20.0
+      ymax = 17.0
 c
 c     ymin = 20.0 leads to an underflow and denormal, 17 is okay
 c
@@ -87,7 +87,7 @@ c
       if (input .eq. 'k' .or. input .eq. 'K') then
         write (*,20)
   20    format (/,1x,'Enter number of steps for BL solve ==> ',$)
-        read (*,*) n
+        read (*,*) nbl
         write (*,25)
   25    format (/,1x,'Enter number of steps for shooting ==> ',$)
         read (*,*) nstep
@@ -118,7 +118,7 @@ c
         do while (string(1:1) .eq. '#')
           read(inunit,'(a)',err=99) string
         end do
-        call readi (string,n)
+        call readi (string,nbl)
         read(inunit,'(a)') string
         call readi (string,nstep)
         read(inunit,'(a)') string
@@ -145,8 +145,8 @@ c
 c
 c     Echo input
 c
-      write (*,100) n
- 100  format (/,1x,'n = ',i5)
+      write (*,100) nbl
+ 100  format (/,1x,'nbl = ',i5)
       write (*,102) nstep
  102  format (1x,'nstep = ',i5)
       write (*,105) testalpha
@@ -168,7 +168,7 @@ c     Set constants
 c
       alpha = cmplx(alphar,alphai)
       c = cmplx(cr,ci)
-      h = (ymax-ymin)/float(n)
+      h = (ymax-ymin)/float(nbl)
 c
 c     Fix to make my nondimensionalization match Mack's
 c
@@ -179,7 +179,7 @@ c
 c
 c     Check problem size
 c      
-      if (n .gt. imax) then
+      if (nbl .gt. imax) then
         write (*,300) 
  300    format (/,/,1x,'N > Idim...Stopping',/,/)
         goto 210
@@ -197,11 +197,10 @@ c
       end do
       
       call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,eigfun)
-
-      goto 210
 c
 c     Read error
 c      
+      goto 210
   99  write (*,200) 
  200  format(/,/1x,'Error in input file...',/,/)
  210  continue
@@ -334,14 +333,8 @@ c
                 aa = ABS(inprod(n, U(1,mi,k), U(1,mi,k)))
                 bb = ABS(inprod(n, U(1,mj,k), U(1,mj,k)))
                 cc = ABS(inprod(n, U(1,mi,k), U(1,mj,k)))
-                test = cc/SQRT(aa*bb)
                 test = acos(cc/SQRT(aa*bb))
-c               test = ACOS( ABS ( inprod(n, U(1,mi,k), U(1,mj,k)) / 
-c      &                      SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
-c      &                            inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
-c               if (test .gt. testalpha) norm = .true.
                 if (test .lt. ta) norm = .true.
-c               if (norm) write (*,*) k, mi, mj, test, testalpha, norm
 c               write (*,*) k, mi, mj, test, testalpha, norm
               end if
             end do
@@ -501,6 +494,7 @@ c
 c     Second Pass to compute the eigenfunctions
 c
       if (eigfun) then
+        q  = qend
         vmax = 0.0
         k = nstep
         do i = 1, n
@@ -669,10 +663,10 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     &                    rgamma, beta, uspl, d2uspl, ydat
+      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
+     &                   rgamma, beta, uspl, d2uspl, ydat
      
-      common      /eig/   c, alpha, Re
+      common      /eig/  c, alpha, Re
 c***********************************************************************
       integer     neq
       complex     yo(neq), yf(neq)
@@ -683,11 +677,11 @@ c***********************************************************************
 c
 c     Get the velocity field
 c
-#if 0
-      call SPEVAL(n+1,ydat,U,Uspl,t,UU)
-      call SPEVAL(n+1,ydat,d2U,d2Uspl,t,d2UU)
+#ifdef USE_SPINE_DERIVATIVE
+      call SPEVAL(nbl+1,ydat,U,Uspl,t,UU)
+      call SPEVAL(nbl+1,ydat,d2U,d2Uspl,t,d2UU)
 #else
-      call SPDER(n+1,ydat,U,Uspl,t,UU,dUU,d2UU)
+      call SPDER(nbl+1,ydat,U,Uspl,t,UU,dUU,d2UU)
 #endif
       do j = 1 , neq-1
         yf(j) = yo(j+1)
@@ -714,10 +708,10 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     &                    rgamma, beta, uspl, d2uspl, ydat
+      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
+     &                   rgamma, beta, uspl, d2uspl, ydat
      
-      common      /eig/   c, alpha, Re
+      common      /eig/  c, alpha, Re
 c***********************************************************************
       integer     neq
       complex     yo(neq), yf(neq)
@@ -728,11 +722,11 @@ c***********************************************************************
 c
 c     Get the velocity field
 c
-#if 0
-      call SPEVAL(n+1,ydat,U,Uspl,t,UU)
-      call SPEVAL(n+1,ydat,d2U,d2Uspl,t,d2UU)
+#ifdef USE_SPINE_DERIVATIVE
+      call SPEVAL(nbl+1,ydat,U,Uspl,t,UU)
+      call SPEVAL(nbl+1,ydat,d2U,d2Uspl,t,d2UU)
 #else
-      call SPDER(n+1,ydat,U,Uspl,t,UU,dUU,d2UU)
+      call SPDER(nbl+1,ydat,U,Uspl,t,UU,dUU,d2UU)
 #endif
       do j = 1 , neq-1
         yf(j) = yo(j+1)
@@ -760,10 +754,10 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     &                    rgamma, beta, uspl, d2uspl, ydat
+      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
+     &                   rgamma, beta, uspl, d2uspl, ydat
      
-      common      /eig/   c, alpha, Re
+      common      /eig/  c, alpha, Re
 c***********************************************************************
       integer     i, j, k, p
       real        xi(3,0:imax), f(3), eta(3), y
@@ -771,7 +765,7 @@ c***********************************************************************
       external    BLASIUS, RKQCR
       
       do j = 1,3
-        do i = 0,n
+        do i = 0,nbl
           xi(j,i) = 0.0
         end do
         f(j) = 0.0
@@ -787,7 +781,7 @@ c
       p = 1
       do while ( abs(err) .gt. 1.e-10)
 
-        do i = 1, n
+        do i = 1, nbl
           y = ymin + float(i)*h
           call SRK4(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
         end do
@@ -799,52 +793,53 @@ c
           xi(3,0) = xi(3,0)*.99
         else
           xi3temp = xi(3,0)
-          xi(3,0) = xi(3,0)+((xi3old-xi(3,0))/(xi2old-xi(2,n)))*
-     &              (1.0 - xi(2,n))
+          xi(3,0) = xi(3,0)+((xi3old-xi(3,0))/(xi2old-xi(2,nbl)))*
+     &              (1.0 - xi(2,nbl))
           xi3old = xi3temp
         end if
         p = p + 1
-        xi2old = xi(2,n)
+        xi2old = xi(2,nbl)
         err = 1.0 - xi2old
 c       write (*,*) p, err
       end do
 c
 c     Now assemble the velocity field
 c
-      do i = 0, n
+      do i = 0, nbl
         u(i) = xi(2,i)
       end do
 c
 c     Compute 2nd order finite difference approximation to 
 c     second derivative
 c
-      do i = 1, n-1
+      do i = 1, nbl-1
         d2u(i) = (u(i+1)-2*u(i)+u(i-1))/(h)**2
       end do
       d2u(0) = (-u(4)+4*u(3)-5*u(2)+2*u(1))/(h)**2
-      d2u(n) = (2*u(n)-5*u(n-1)+4*u(n-2)-u(n-3))/(h)**2
+      d2u(nbl) = (2*u(nbl)-5*u(nbl-1)+4*u(nbl-2)-u(nbl-3))/(h)**2
 c
 c     Need to interpolate the velocity profile to evaluate it at
 c     arbitrary y
 c
-      do i = 0, n
+      do i = 0, nbl
         ydat(i) = ymin + i*h
       end do
-      call SPLINE(n+1,ydat,u,uspl)
+      call SPLINE(nbl+1,ydat,u,uspl)
 c
 c     Use the spline result for the second derivative instead of FD
 c
-      do i = 0, n
+      do i = 0, nbl
         d2u(i) = uspl(i)
       end do
-      call SPLINE(n+1,ydat,d2u,d2uspl)
+      call SPLINE(nbl+1,ydat,d2u,d2uspl)
 
 c     open (10, FILE='bl.dat', ACTION='WRITE', FORM='FORMATTED')
-      do i = 0, n
+      do i = 0, nbl
         y = ymin + i*h
-        call SPDER(n+1,ydat,u,uspl,y,us,dus,ddus)
-        call SPEVAL(n+1,ydat,d2u,d2uspl,y,d2us)
-        write (10,10) y, us, dus, ddus, d2us, u(i), d2u(i)
+        call SPDER(nbl+1,ydat,u,uspl,y,us,dus,ddus)
+        call SPEVAL(nbl+1,ydat,d2u,d2uspl,y,d2us)
+        write (10,10) y, us, d2us, u(i), d2u(i)
+c       write (10,10) y, us, dus, ddus, d2us, u(i), d2u(i)
   10    format (1x,7(ES16.8E3,1x))
       end do
 c     close(10)
@@ -865,15 +860,15 @@ c***********************************************************************
 c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
-      integer     n
+      integer     nbl
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /setup/ n, u, d2u, ymin, ymax, h, f2p,
-     &                    rgamma, beta, uspl, d2uspl, ydat
+      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
+     &                   rgamma, beta, uspl, d2uspl, ydat
      
-      common      /eig/   c, alpha, Re
+      common      /eig/  c, alpha, Re
 c***********************************************************************
       integer     neq
       real        xi(neq), f(neq), y
