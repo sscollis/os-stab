@@ -7,14 +7,14 @@
 #  Revised: 11-10-97
 #
 #==============================================================
-DEBUG = -O2 -ffpe-trap=invalid,zero,overflow
-#DEBUG = -g -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow
-#,zero,overflow,underflow,denormal
-#DEBUG = -g -fbacktrace -ffpe-trap=invalid
-FFLAGS = -cpp -ffixed-line-length-120 -fdefault-integer-8 -fdefault-real-8 \
-				 -std=legacy $(DEFINES) $(DEBUG)
-F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 $(DEFINES) $(DEBUG)
-LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas
+#
+# If you have a license to use Numerical Recipes 
+# you can activate it with this define.  
+#
+ifdef USE_NR
+  DEFINES += -DUSE_NR_HUNT -DUSE_NR_ODEINT
+	NR_OBJ = nr.o
+endif
 #
 # Compilers
 #
@@ -25,9 +25,25 @@ F77 = gfortran
 #
 # Define all objects
 #
-ALL = conte contebl orrncbl orrcolchan orrsom bl orrspace conteucbl orrfdbl orrfdchan orrucbfs orrucbl orrwong
+ALL = bl conte contebl conteucbl orrncbl orrcolchan orrsom orrspace \
+			orrfdbl orrfdchan orrucbfs orrucbl orrwong
 #
-OBJS = $(foreach module, $(ALL), $(module).o)
+OBJS = $(foreach module, $(ALL), $(module).o) $(NR_OBJ)
+#
+# Optimization/debug flags
+#
+OPT = -O2 -ffpe-trap=invalid,zero,overflow
+#DEBUG = -g -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow,denormal
+#
+# Compiler flags
+#
+FFLAGS = -cpp -ffixed-line-length-120 -fdefault-integer-8 -fdefault-real-8 \
+         -std=legacy $(DEFINES) $(OPT) $(DEBUG)
+F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 $(DEFINES) $(OPT) $(DEBUG)
+#
+# External Libraries
+#
+LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas $(NR_OBJ)
 #
 #  Define Fortran 90 suffix
 #
@@ -47,6 +63,12 @@ all:
 	$(MAKE) orrucbfs
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
+
+contebl: contebl.o $(NR_OBJ)
+	$(FC) $(LIB) contebl.o -o contebl
+
+conteucbl: conteucbl.o $(NR_OBJ)
+	$(FC) $(LIB) conteucbl.o -o conteucbl
 
 orrncbl: orrncbl.o
 	$(FC) $(LIB) orrncbl.o -o orrncbl
@@ -70,7 +92,7 @@ orrwong: orrwong.o
 	$(FC) $(LIB) orrwong.o -o orrwong
 
 clean:
-	/bin/rm -fr $(ALL) $(OBJS) *.mod *.dSYM
+	/bin/rm -fr $(ALL) *.o *.mod *.dSYM
 
 .f90.o:
 	 $(FC) $(F90FLAGS) -c $*.f90

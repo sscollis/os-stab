@@ -1113,10 +1113,28 @@ C-----F =  THE INTERPOLATED RESULT
 C-----FP = THE INTERPOLATED DERIVATIVE RESULT
       DIMENSION X(N),Y(N),FDP(N)
 C-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.
+#if USE_NR_HUNT
+c
+c     Search using bisection with a good guess
+c
+      I = IOLD
+      IF (XX.EQ.X(1)) THEN
+        I = 1
+      ELSE IF (XX.EQ.X(N)) THEN
+        I = N
+      ELSE
+        call HUNT (X,N,XX,I)
+      END IF
+      IOLD = I
+#else
+c
+c     This is really a slow way of searching
+c
       NM1 = N - 1
       DO 1 I=1,NM1
       IF (XX.LE.X(I+1)) GO TO 10
     1 CONTINUE
+#endif
 C-----NOW EVALUATE THE CUBIC
    10 DXM = XX - X(I)
       DXP = X(I+1) - XX

@@ -320,7 +320,18 @@ c
 c         Loop thru all homogeneous solutions
 c
           do m = 1, n-r
+#ifdef USE_NR_ODEINT
+            do i = 1, n
+              Utemp(i) = U(i,m,k-1)
+            end do
+            call ODEINT(Utemp,n,t+h,t,1.E-6,-h,1.e-20,nok,nbad,
+     &                  FHOMO,RKQC)
+            do i = 1, n
+              U(i,m,k) = Utemp(i)
+            end do
+#else
             call CRK4(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+#endif
           end do
 c
 c         Test to see if normalization is required
@@ -783,7 +794,18 @@ c
 
         do i = 1, nbl
           y = ymin + float(i)*h
+#ifdef USE_NR_ODEINT
+          do j = 1, 3
+            eta(j) = xi(j,i-1)
+          end do
+          call ODEINTR(eta,3,y-h,y,1.E-7,h/2.,1.e-20,nok,nbad,
+     &                 BLASIUS,RKQCR)
+          do j = 1, 3
+            xi(j,i) = eta(j)
+          end do
+#else
           call SRK4(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
+#endif
         end do
 c
 c       Check f'(ymax)
@@ -951,10 +973,28 @@ C-----     AN INTERPOLATED VALUE IS REQUESTED
 C-----F =  THE INTERPOLATED RESULT       
       DIMENSION X(N),Y(N),FDP(N)      
 C-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.          
-      NM1 = N - 1    
-      DO 1 I=1,NM1   
-      IF (XX.LE.X(I+1)) GO TO 10         
-    1 CONTINUE       
+#if USE_NR_HUNT
+c
+c     Search using bisection with a good guess
+c
+      I = IOLD
+      IF (XX.EQ.X(1)) THEN
+        I = 1
+      ELSE IF (XX.EQ.X(N)) THEN
+        I = N
+      ELSE
+        call HUNT (X,N,XX,I)
+      END IF
+      IOLD = I
+#else
+c
+c     This is really a slow way of searching
+c
+      NM1 = N - 1
+      DO 1 I=1,NM1
+      IF (XX.LE.X(I+1)) GO TO 10
+    1 CONTINUE   
+#endif
 C-----NOW EVALUATE THE CUBIC   
    10 DXM = XX - X(I)          
       DXP = X(I+1) - XX        
@@ -982,10 +1022,28 @@ C-----F =  THE INTERPOLATED RESULT
 C-----FP = THE INTERPOLATED DERIVATIVE RESULT       
       DIMENSION X(N),Y(N),FDP(N)
 C-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.          
+#if USE_NR_HUNT
+c
+c     Search using bisection with a good guess
+c
+      I = IOLD
+      IF (XX.EQ.X(1)) THEN
+        I = 1
+      ELSE IF (XX.EQ.X(N)) THEN
+        I = N
+      ELSE
+        call HUNT (X,N,XX,I)
+      END IF
+      IOLD = I
+#else
+c
+c     This is really a slow way of searching
+c
       NM1 = N - 1
       DO 1 I=1,NM1
       IF (XX.LE.X(I+1)) GO TO 10
     1 CONTINUE   
+#endif
 C-----NOW EVALUATE THE CUBIC   
    10 DXM = XX - X(I)
       DXP = X(I+1) - XX
