@@ -15,6 +15,15 @@ ifdef USE_NR
   DEFINES += -DUSE_NR_HUNT -DUSE_NR_ODEINT
 	NR_OBJ = nr.o
 endif
+
+ifdef USE_RKF45
+	DEFINES += -DUSE_RKF45
+	RKF45_OBJ = rkf45.o
+endif
+
+ifdef USE_LSRK14
+	DEFINES += -DUSE_LSRK14
+endif
 #
 # Compilers
 #
@@ -43,7 +52,7 @@ F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 $(DEFINES) $(OPT) $(DEBUG)
 #
 # External Libraries
 #
-LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas $(NR_OBJ)
+LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas $(NR_OBJ) $(RKF45_OBJ)
 #
 #  Define Fortran 90 suffix
 #
@@ -64,7 +73,7 @@ all:
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
 
-contebl: contebl.o $(NR_OBJ)
+contebl: contebl.o $(NR_OBJ) $(RKF45_OBJ)
 	$(FC) $(LIB) contebl.o -o contebl
 
 conteucbl: conteucbl.o $(NR_OBJ)
