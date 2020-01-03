@@ -25,20 +25,28 @@ ifdef USE_NR_HUNT
 endif
 	NR_OBJ = nr.o
 endif
-
+#
+# Experimental (don't use)
+#
 ifdef USE_RKF45
 	DEFINES += -DUSE_RKF45
 	RKF45_OBJ = rkf45.o
 endif
-
+#
+# High order, but RKCK45 works better in practise
+#
 ifdef USE_LSRK14
 	DEFINES += -DUSE_LSRK14
 endif
-
+#
+# This currently is the best choice
+#
 ifdef USE_RKCK45
 	DEFINES += -DUSE_RKCK45
 endif
-
+#
+# Experimental (i.e. don't use) 
+#
 ifdef USE_VODE
 	DEFINES += -DUSE_VODE
 	VODE_OBJ = zvode.o
