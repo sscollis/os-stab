@@ -236,6 +236,30 @@ C***********************************************************************
 
       real        errtol, maxcount, eigtol
 c
+c     Setup for ZVODE
+c
+#ifdef USE_VODE
+      real RWORK(20+(n*(n-r)))
+      complex ZWORK(15*(n*(n-r)))
+      integer IWORK(30+(n*(n-r)))
+      external FHOMO_VODE
+      real RTOL, ATOL, RPAR
+      integer ITOL, ITASK, ISTATE, IOPT, LZW, LRW, LIW, MF, IPAR(2)
+      ITOL = 1
+      RTOL = 1.0D-9
+      ATOL = 1.0D-8
+      ITASK = 1
+      ISTATE = 1
+      IOPT = 0
+      LZW = 15*(n*(n-r))
+      LRW = 20+(n*(n-r))
+      LIW = 30+(n*(n-r))
+      MF = 10
+      RPAR = 0.0
+      IPAR(1) = n 
+      IPAR(2) = n-r
+#endif
+c
 c     initialize variables
 c
       errtol = 1.0e-14
@@ -329,12 +353,55 @@ c
             do i = 1, n
               U(i,m,k) = Utemp(i)
             end do
+c#elif USE_VODE
+c            ISTATE=1
+c            rt0 = t+h
+c            rt1 = t
+c            do i = 1, n
+c              Utemp(i) = U(i,m,k-1)
+c            end do
+cc           write(*,*) "Calling ZVODE...", rt0, rt1
+c            call ZVODE(FHOMO_VODE,n,Utemp,rt0,rt1,ITOL,RTOL,ATOL,ITASK,
+c     &                 ISTATE,IOPT,ZWORK,LZW,RWORK,LRW,IWORK,LIW,JEX,MF,
+c     &                 RPAR,IPAR)
+c           write(*,*) "Finixhed ZVODE...", rt0, rt1
+c            if (ISTATE .lt. 0) then
+c              write(*,*) "Error in ZVODE:  ISTATE = ", ISTATE
+c              call exit(1)
+c            end if
+c            do i = 1, n
+c              U(i,m,k) = Utemp(i)
+c            end do
 #elif USE_LSRK14
             call CLSRK14(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
+#elif USE_RKCK45
+            call CRKCK45( n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO )
 #else
             call CRK4(n, U(1,m,k-1), U(1,m,k), t+h, -h, FHOMO)
 #endif
           end do
+#if 0
+          if (norm .or. k.eq.1) ISTATE=1
+          ISTATE=1
+          rt0 = t+h
+          rt1 = t
+          do m = 1, n-r
+            do i = 1, n
+              U(i,m,k) = U(i,m,k-1)
+            end do
+          end do
+c         write(*,*) "Calling ZVODE...", rt0, rt1, n*(n-r)
+          call ZVODE(FHOMO_VODE,n*(n-r),U(1,1,k),rt0,rt1,ITOL,RTOL,ATOL,
+     &               ITASK,ISTATE,IOPT,ZWORK,LZW,RWORK,LRW,IWORK,LIW,
+     &               JEX,MF,RPAR,IPAR)
+          if (ISTATE .lt. 0) then
+            write(*,*) "Error in ZVODE:  ISTATE = ", ISTATE
+            call exit(1)
+          end if
+#else
+c         write(*,*) "Hack...fix it"
+c         stop
+#endif
 c
 c         Test to see if normalization is required
 c
@@ -376,7 +443,8 @@ c
               end do
               do mj = mi-1, 1, -1
                 do i = 1, n
-                  eta(i) = eta(i) - inprod(n, U(1,mi,k), z(1,mj))*z(i,mj)
+                  eta(i) = eta(i) - inprod(n, U(1,mi,k), 
+     &                     z(1,mj))*z(i,mj)
                 end do
               end do
               w(mi) = SQRT(inprod(n, eta, eta))
@@ -662,7 +730,21 @@ c***********************************************************************
       end
 
 C***********************************************************************
-      subroutine FHOMO(neq, yo,t,yf)
+      subroutine FHOMO_VODE(neq,t,yo,yf,rpar,ipar)
+C***********************************************************************
+      integer neq
+      integer ipar(2)
+      real rpar
+      real t
+      complex yo(IPAR(1),IPAR(2)), yf(IPAR(1),IPAR(2))
+c     write(*,*) NEQ, IPAR(1), IPAR(2)
+      do m = 1, IPAR(2) 
+        call FHOMO(IPAR(1),yo(1,m),t,yf(1,m))
+      end do
+      return
+      end
+C***********************************************************************
+      subroutine FHOMO(neq,yo,t,yf)
 C***********************************************************************
 C
 C     Function evaluation for the Orr-Sommerfeld equation
@@ -824,6 +906,8 @@ c
           end do
 #elif USE_LSRK14
           call SLSRK14(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
+#elif USE_RKCK45
+          call SRKCK45(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
 #else
           call SRK4(3, xi(1,i-1), xi(1,i), y-h, h, BLASIUS)
 #endif
@@ -879,10 +963,18 @@ c
 c     open (10, FILE='bl.dat', ACTION='WRITE', FORM='FORMATTED')
       do i = 0, nbl
         y = ymin + i*h
-        call SPDER(nbl+1,ydat,u,uspl,y,us,dus,ddus)
+#ifdef USE_SPLINE_DERIVATIVE
+        call SPEVAL(nbl+1,ydat,u,uspl,y,us)
         call SPEVAL(nbl+1,ydat,d2u,d2uspl,y,d2us)
         write (10,10) y, us, d2us, u(i), d2u(i)
-c       write (10,10) y, us, dus, ddus, d2us, u(i), d2u(i)
+#else
+        call SPDER(nbl+1,ydat,u,uspl,y,us,dus,d2us)
+#ifdef USE_OUTPUT_DERIVATIVE
+        write (10,10) y, us, dus, d2us, u(i), d2u(i)
+#else
+        write (10,10) y, us, d2us, u(i), d2u(i)
+#endif
+#endif
   10    format (1x,7(ES16.8E3,1x))
       end do
 c     close(10)
@@ -1349,3 +1441,153 @@ C***********************************************************************
       end do
       return
       end
+
+C***********************************************************************
+      subroutine SRKCK45(neq, yo, yf, to, h, FUNC)
+C***********************************************************************
+C
+C     Advance one time step Runge-Kutta Cash-Karp method
+C
+C***********************************************************************
+      external FUNC
+      integer  neq
+      real     to, h, t
+      real     yo(neq), yf(neq), yt(neq)
+      real     yk(neq,6), ye(neq)
+C***********************************************************************
+      real b(6,5)
+      real a(6), c(6), d(6)
+      data a / 0.0, 0.2, 0.3, 0.6, 1.0, 0.875 /
+      data b / 0.0, 0.2, 0.075, 0.3, -0.2037037037037037,
+     &         0.029495804398148147,
+     &         0.0, 0.0, 0.225, -0.9, 2.5, 0.341796875,
+     &         0.0, 0.0, 0.0, 1.2, -2.5925925925925926,
+     &         0.041594328703703706,
+     &         0.0, 0.0, 0.0, 0.0, 1.2962962962962963,
+     &         0.40034541377314814,
+     &         0.0, 0.0, 0.0, 0.0, 0.0, 0.061767578125 /
+      data c / 0.09788359788359788, 0.0, 0.4025764895330113,
+     &         0.21043771043771045, 0.0, 0.2891022021456804 /
+      data d / -0.004293774801587311, 0.0, 0.018668586093857853,
+     &         -0.034155026830808066, -0.019321986607142856,
+     &         0.03910220214568039 /
+c
+c     Test data
+c
+#ifdef OS_DEBUG
+      do i = 1, 6
+        do j = 1, 5
+          write(*,*) i, j, b(i,j)
+        end do
+      end do
+      stop
+#endif
+c
+c     Stage 1 - 6
+c
+      do m = 1, 6
+        t = to + a(m)*h
+        do n = 1, neq
+          yt(n) = yo(n)
+        end do
+        do k = 1, m-1
+          do n = 1, neq
+            yt(n) = yt(n) + b(m,k)*yk(n,k)
+          end do
+        end do
+        call FUNC(neq, yt, t, yk(1,m))
+        do n = 1, neq
+          yk(n,m) = h * yk(n,m)
+        end do
+      end do
+c
+c     Final solution and error
+c
+      do n = 1, neq
+        yf(n) = yo(n)
+        ye(n) = 0.0
+      end do
+      do k = 1, 6
+        do n = 1, neq
+          yf(n) = yf(n) + c(k)*yk(n,k)
+          ye(n) = ye(n) + d(k)*yk(n,k)
+        end do
+      end do
+
+      return
+      end
+
+C***********************************************************************
+      subroutine CRKCK45(neq, yo, yf, to, h, FUNC)
+C***********************************************************************
+C
+C     Advance one time step Runge-Kutta Cash-Karp method
+C
+C***********************************************************************
+      external FUNC
+      integer  neq
+      real     to, h, t
+      complex  yo(neq), yf(neq), yt(neq)
+      complex  yk(neq,6), ye(neq)
+C***********************************************************************
+      real b(6,5)
+      real a(6), c(6), d(6)
+      data a / 0.0, 0.2, 0.3, 0.6, 1.0, 0.875 /
+      data b / 0.0, 0.2, 0.075, 0.3, -0.2037037037037037, 
+     &         0.029495804398148147,
+     &         0.0, 0.0, 0.225, -0.9, 2.5, 0.341796875,
+     &         0.0, 0.0, 0.0, 1.2, -2.5925925925925926, 
+     &         0.041594328703703706,
+     &         0.0, 0.0, 0.0, 0.0, 1.2962962962962963,
+     &         0.40034541377314814,
+     &         0.0, 0.0, 0.0, 0.0, 0.0, 0.061767578125 /
+      data c / 0.09788359788359788, 0.0, 0.4025764895330113,
+     &         0.21043771043771045, 0.0, 0.2891022021456804 /
+      data d / -0.004293774801587311, 0.0, 0.018668586093857853,
+     &         -0.034155026830808066, -0.019321986607142856,
+     &         0.03910220214568039 / 
+c
+c     Test data
+c
+#ifdef OS_DEBUG
+      do i = 1, 6
+        do j = 1, 5
+          write(*,*) i, j, b(i,j)
+        end do
+      end do
+      stop
+#endif
+c
+c     Stage 1 - 6
+c
+      do m = 1, 6 
+        t = to + a(m)*h
+        do n = 1, neq
+          yt(n) = yo(n)
+        end do
+        do k = 1, m-1
+          do n = 1, neq
+            yt(n) = yt(n) + b(m,k)*yk(n,k)
+          end do
+        end do 
+        call FUNC(neq, yt, t, yk(1,m))
+        do n = 1, neq
+          yk(n,m) = h * yk(n,m)
+        end do
+      end do
+c
+c     Final solution and error
+c
+      do n = 1, neq
+        yf(n) = yo(n)
+        ye(n) = 0.0
+      end do
+      do k = 1, 6
+        do n = 1, neq
+          yf(n) = yf(n) + c(k)*yk(n,k)
+          ye(n) = ye(n) + d(k)*yk(n,k)
+        end do
+      end do
+
+      return
+      end 

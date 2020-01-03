@@ -11,8 +11,18 @@
 # If you have a license to use Numerical Recipes 
 # you can activate it with this define.  
 #
+ifdef USE_NR_ALL
+	USE_NR = 1
+	USE_NR_ODEINT = 1
+	USE_NR_HUNT = 1
+endif
 ifdef USE_NR
-  DEFINES += -DUSE_NR_HUNT -DUSE_NR_ODEINT
+ifdef USE_NR_ODEINT
+  DEFINES += -DUSE_NR_ODEINT
+endif
+ifdef USE_NR_HUNT
+  DEFINES += -DUSE_NR_HUNT
+endif
 	NR_OBJ = nr.o
 endif
 
@@ -23,6 +33,15 @@ endif
 
 ifdef USE_LSRK14
 	DEFINES += -DUSE_LSRK14
+endif
+
+ifdef USE_RKCK45
+	DEFINES += -DUSE_RKCK45
+endif
+
+ifdef USE_VODE
+	DEFINES += -DUSE_VODE
+	VODE_OBJ = zvode.o
 endif
 #
 # Compilers
@@ -47,12 +66,13 @@ OPT = -O2 -ffpe-trap=invalid,zero,overflow
 # Compiler flags
 #
 FFLAGS = -cpp -ffixed-line-length-120 -fdefault-integer-8 -fdefault-real-8 \
-         -std=legacy $(DEFINES) $(OPT) $(DEBUG)
-F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 $(DEFINES) $(OPT) $(DEBUG)
+         -fdefault-double-8 -std=legacy $(DEFINES) $(OPT) $(DEBUG)
+F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 -fdefault-double-8 \
+					 $(DEFINES) $(OPT) $(DEBUG)
 #
 # External Libraries
 #
-LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas $(NR_OBJ) $(RKF45_OBJ)
+LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
 #
 #  Define Fortran 90 suffix
 #
@@ -73,7 +93,7 @@ all:
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
 
-contebl: contebl.o $(NR_OBJ) $(RKF45_OBJ)
+contebl: contebl.o $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
 	$(FC) $(LIB) contebl.o -o contebl
 
 conteucbl: conteucbl.o $(NR_OBJ)
