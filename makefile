@@ -65,9 +65,9 @@ OPT = -O2 -ffpe-trap=invalid,zero,overflow
 #
 # Compiler flags
 #
-FFLAGS = -cpp -ffixed-line-length-120 -fdefault-integer-8 -fdefault-real-8 \
-         -fdefault-double-8 -std=legacy $(DEFINES) $(OPT) $(DEBUG)
-F90FLAGS = -cpp -fdefault-integer-8 -fdefault-real-8 -fdefault-double-8 \
+FFLAGS = -cpp -ffixed-line-length-120 -freal-4-real-8 -fdefault-real-8 \
+         -fdefault-integer-8 -std=legacy $(DEFINES) $(OPT) $(DEBUG)
+F90FLAGS = -cpp -freal-4-real-8 -fdefault-real-8 -fdefault-integer-8 \
 					 $(DEFINES) $(OPT) $(DEBUG)
 #
 # External Libraries

@@ -223,12 +223,20 @@ c
 c         Loop thru all homogeneous solutions
 c
           do m = 1, n-r
-            call RK4(n, U(1,m,k-1), U(1,m,k), t-h, h, FHOMO)
+#ifdef USE_RKCK45
+            call CRKCK45(n, U(1,m,k-1), U(1,m,k), t-h, h, FHOMO)
+#else
+            call CRK4(n, U(1,m,k-1), U(1,m,k), t-h, h, FHOMO)
+#endif
           end do
 c
 c         Now the particular solution
 c
-          call RK4(n, v(1,k-1), v(1,k), t-h, h, FPART)
+#ifdef USE_RKCK45
+          call CRKCK45(n, v(1,k-1), v(1,k), t-h, h, FPART)
+#else
+          call CRK4(n, v(1,k-1), v(1,k), t-h, h, FPART)
+#endif
 c
 c         Check to see it orthonomalization is required
 c       
@@ -519,7 +527,7 @@ c
       end
 
 C***********************************************************************
-      subroutine RK4(neq, yo, yf, to, h, FUNC)
+      subroutine CRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
 C
 C     Advance one time step using fourth order (complex) Runge-Kutta
@@ -692,5 +700,155 @@ C***********************************************************************
       u      = 1.0 - y**2
       dudy   = -2.0*y
       d2udy2 = -2.0
+      return
+      end
+
+C***********************************************************************
+      subroutine SRKCK45(neq, yo, yf, to, h, FUNC)
+C***********************************************************************
+C
+C     Advance one time step Runge-Kutta Cash-Karp method
+C
+C***********************************************************************
+      external FUNC
+      integer  neq
+      real     to, h, t
+      real     yo(neq), yf(neq), yt(neq)
+      real     yk(neq,6), ye(neq)
+C***********************************************************************
+      real b(6,5)
+      real a(6), c(6), d(6)
+      data a / 0.0, 0.2, 0.3, 0.6, 1.0, 0.875 /
+      data b / 0.0, 0.2, 0.075, 0.3, -0.2037037037037037,
+     &         0.029495804398148147,
+     &         0.0, 0.0, 0.225, -0.9, 2.5, 0.341796875,
+     &         0.0, 0.0, 0.0, 1.2, -2.5925925925925926,
+     &         0.041594328703703706,
+     &         0.0, 0.0, 0.0, 0.0, 1.2962962962962963,
+     &         0.40034541377314814,
+     &         0.0, 0.0, 0.0, 0.0, 0.0, 0.061767578125 /
+      data c / 0.09788359788359788, 0.0, 0.4025764895330113,
+     &         0.21043771043771045, 0.0, 0.2891022021456804 /
+      data d / -0.004293774801587311, 0.0, 0.018668586093857853,
+     &         -0.034155026830808066, -0.019321986607142856,
+     &         0.03910220214568039 /
+c
+c     Test data
+c
+#ifdef OS_DEBUG
+      do i = 1, 6
+        do j = 1, 5
+          write(*,*) i, j, b(i,j)
+        end do
+      end do
+      stop
+#endif
+c
+c     Stage 1 - 6
+c
+      do m = 1, 6
+        t = to + a(m)*h
+        do n = 1, neq
+          yt(n) = yo(n)
+        end do
+        do k = 1, m-1
+          do n = 1, neq
+            yt(n) = yt(n) + b(m,k)*yk(n,k)
+          end do
+        end do
+        call FUNC(neq, yt, t, yk(1,m))
+        do n = 1, neq
+          yk(n,m) = h * yk(n,m)
+        end do
+      end do
+c
+c     Final solution and error
+c
+      do n = 1, neq
+        yf(n) = yo(n)
+        ye(n) = 0.0
+      end do
+      do k = 1, 6
+        do n = 1, neq
+          yf(n) = yf(n) + c(k)*yk(n,k)
+          ye(n) = ye(n) + d(k)*yk(n,k)
+        end do
+      end do
+
+      return
+      end
+
+C***********************************************************************
+      subroutine CRKCK45(neq, yo, yf, to, h, FUNC)
+C***********************************************************************
+C
+C     Advance one time step Runge-Kutta Cash-Karp method
+C
+C***********************************************************************
+      external FUNC
+      integer  neq
+      real     to, h, t
+      complex  yo(neq), yf(neq), yt(neq)
+      complex  yk(neq,6), ye(neq)
+C***********************************************************************
+      real b(6,5)
+      real a(6), c(6), d(6)
+      data a / 0.0, 0.2, 0.3, 0.6, 1.0, 0.875 /
+      data b / 0.0, 0.2, 0.075, 0.3, -0.2037037037037037,
+     &         0.029495804398148147,
+     &         0.0, 0.0, 0.225, -0.9, 2.5, 0.341796875,
+     &         0.0, 0.0, 0.0, 1.2, -2.5925925925925926,
+     &         0.041594328703703706,
+     &         0.0, 0.0, 0.0, 0.0, 1.2962962962962963,
+     &         0.40034541377314814,
+     &         0.0, 0.0, 0.0, 0.0, 0.0, 0.061767578125 /
+      data c / 0.09788359788359788, 0.0, 0.4025764895330113,
+     &         0.21043771043771045, 0.0, 0.2891022021456804 /
+      data d / -0.004293774801587311, 0.0, 0.018668586093857853,
+     &         -0.034155026830808066, -0.019321986607142856,
+     &         0.03910220214568039 /
+c
+c     Test data
+c
+#ifdef OS_DEBUG
+      do i = 1, 6
+        do j = 1, 5
+          write(*,*) i, j, b(i,j)
+        end do
+      end do
+      stop
+#endif
+c
+c     Stage 1 - 6
+c
+      do m = 1, 6
+        t = to + a(m)*h
+        do n = 1, neq
+          yt(n) = yo(n)
+        end do
+        do k = 1, m-1
+          do n = 1, neq
+            yt(n) = yt(n) + b(m,k)*yk(n,k)
+          end do
+        end do
+        call FUNC(neq, yt, t, yk(1,m))
+        do n = 1, neq
+          yk(n,m) = h * yk(n,m)
+        end do
+      end do
+c
+c     Final solution and error
+c
+      do n = 1, neq
+        yf(n) = yo(n)
+        ye(n) = 0.0
+      end do
+      do k = 1, 6
+        do n = 1, neq
+          yf(n) = yf(n) + c(k)*yk(n,k)
+          ye(n) = ye(n) + d(k)*yk(n,k)
+        end do
+      end do
+
       return
       end
