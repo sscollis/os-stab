@@ -54,7 +54,7 @@ c***********************************************************************
       character string*80
 
       complex   INPROD
-      external  OS_IC, OS_HOMO, OS_PART, INPROD
+      external  OSIC, OSHOMO, OSPART, INPROD
 c
 c     Defaults
 c
@@ -200,7 +200,7 @@ c
       end do
       
       call CONTE2(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,c,eigfun,
-     &            OS_IC, OS_HOMO, OS_PART, INPROD)
+     &            OSIC, OSHOMO, OSPART, INPROD)
 c
 c     Read error
 c      
@@ -241,7 +241,7 @@ c
       end
 
 C***********************************************************************
-      subroutine OS_IC(n,r,Uo)
+      subroutine OSIC(n,r,Uo)
 C***********************************************************************
 C
 C     Set the initial condition at infinity for the Orr-Sommerfeld
@@ -290,13 +290,13 @@ C***********************************************************************
       complex yo(IPAR(1),IPAR(2)), yf(IPAR(1),IPAR(2))
 c     write(*,*) NEQ, IPAR(1), IPAR(2)
       do m = 1, IPAR(2) 
-        call OS_HOMO(IPAR(1),yo(1,m),t,yf(1,m))
+        call OSHOMO(IPAR(1),yo(1,m),t,yf(1,m))
       end do
       return
       end
 
 C***********************************************************************
-      subroutine OS_HOMO(neq,yo,t,yf)
+      subroutine OSHOMO(neq,yo,t,yf)
 C***********************************************************************
 C
 C     Function evaluation for the Orr-Sommerfeld equation
@@ -341,7 +341,7 @@ c
       end
 
 C***********************************************************************
-      subroutine OS_PART(neq, yo,t,yf)
+      subroutine OSPART(neq, yo,t,yf)
 C***********************************************************************
 C
 C     Function evaluation for the Orr-Sommerfeld equation
