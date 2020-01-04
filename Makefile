@@ -62,7 +62,7 @@ F77 = gfortran
 # Define all objects
 #
 ALL = bl conte contebl conteucbl orrncbl orrcolchan orrsom orrspace \
-			orrfdbl orrfdchan orrucbfs orrucbl orrwong
+			orrfdbl orrfdchan orrucbfs orrucbl orrwong shoot
 #
 OBJS = $(foreach module, $(ALL), $(module).o) $(NR_OBJ)
 #
@@ -100,6 +100,9 @@ all:
 	$(MAKE) orrucbfs
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
+
+conte: conte.o shoot.o
+	$(FC) $(LIB) shoot.o conte.o -o conte
 
 contebl: contebl.o $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
 	$(FC) $(LIB) contebl.o -o contebl

@@ -35,12 +35,12 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
       integer     nbl
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   rgamma, beta, uspl, d2uspl, ydat
+     &                   beta, uspl, d2uspl, ydat
      
       common      /eig/  c, alpha, Re
 c***********************************************************************
@@ -52,6 +52,9 @@ c***********************************************************************
       character input*1
       character infile*20
       character string*80
+
+      complex   INPROD
+      external  OS_IC, OS_HOMO, OS_PART, INPROD
 c
 c     Defaults
 c
@@ -196,7 +199,8 @@ c
         bc2(i) = 0.0
       end do
       
-      call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,eigfun)
+      call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,c,eigfun,
+     &           OS_IC, OS_HOMO, OS_PART, INPROD)
 c
 c     Read error
 c      
@@ -209,32 +213,34 @@ c
       end
 
 C***********************************************************************
-      subroutine CONTE(nstep, testalpha, n, r, yo, yf, to, tf, eigfun)
+      subroutine CONTE(nstep, testalpha, n, r, yo, yf, to, tf, c, 
+     &                 eigfun, FIC, FHOMO, FPART, INPROD)
 C***********************************************************************
 C
 C     First order linear boundary value problem solver using Conte's
 C     method.  Fourth order Runge-Kutta is used for time advancement
 C
-c***********************************************************************
-      complex     c, alpha
-      real        Re
-      common      /eig/ c, alpha, Re
 C***********************************************************************
       integer     i, m, q, r, s, mi, mj, qend, IPVT(n-r), icount, north
       real        t, tq(0:nstep), to, tf, h 
-      complex     yo(n), yf(n), B(n-r,0:nstep), err, cold, ctemp
+      complex     yo(n), yf(n), B(n-r,0:nstep), err, c, cold, ctemp
       complex     U(n,n-r,0:nstep), P(n-r,n-r,0:nstep), z(n,n-r)
       complex     y(n,0:nstep), v(n,0:nstep), w(n-r), omega(n,0:nstep)
       complex     eta(n),A(n,n-r),x(n),FAC(n-r,n-r), det1, det
-      complex     olderr, INPROD, ut(n,n-r), fd, vmax, rgamma
+      complex     olderr, ut(n,n-r), fd, vmax
       complex     cm1, cm2, errm1, errm2, qt, At, Bt, Ct, Utemp(n)
       real        aa, bb, cc
       real        test, testalpha, pi, det2, AI(n,n-r)
       real        fdxr, fdxi, fdyr, fdyi
       logical     norm, eigfun
-      external    INPROD, FHOMO, FPART, RKQC
+
+      complex     INPROD
+      external    INPROD, FIC, FHOMO, FPART
 
       real        errtol, maxcount, eigtol
+#ifdef USE_NR_ODEINT
+      external    RKQC
+#endif
 c
 c     Setup for ZVODE
 c
@@ -288,17 +294,7 @@ c
 c       Set the initial conditions
 c
         k = 0
-        U(1,1,0) = CEXP(-alpha*tf)
-        U(2,1,0) = (-alpha)*CEXP(-alpha*tf)
-        U(3,1,0) = (alpha**2)*CEXP(-alpha*tf)
-        U(4,1,0) = (-alpha**3)*CEXP(-alpha*tf)
-        
-        rgamma = SQRT(alpha**2+(0.,1.)*alpha*Re*(1.0-c))
-  
-        U(1,2,0) = CEXP(-rgamma*tf)
-        U(2,2,0) = (-rgamma)*CEXP(-rgamma*tf)
-        U(3,2,0) = (rgamma**2)*CEXP(-rgamma*tf)
-        U(4,2,0) = (-rgamma**3)*CEXP(-rgamma*tf)
+        call FIC(n,r,U(1,1,k))
 c
 c       Gram-Schmidt
 c
@@ -730,6 +726,46 @@ c***********************************************************************
       end
 
 C***********************************************************************
+      subroutine OS_IC(n,r,Uo)
+C***********************************************************************
+C
+C     Set the initial condition at infinity for the Orr-Sommerfeld
+C     equation for a boundary layer.   This works better than using
+C     a simple Green's function
+C
+C***********************************************************************
+      integer     n, r
+      complex     Uo(n,n-r)
+C***********************************************************************
+      parameter   (imax=50000)
+      integer     nbl
+      complex     alpha, c
+      real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
+      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
+
+      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
+     &                   beta, uspl, d2uspl, ydat
+
+      common      /eig/ c, alpha, Re
+C***********************************************************************
+      complex     rgamma
+C***********************************************************************
+      Uo(1,1) = CEXP(-alpha*ymax)
+      Uo(2,1) = (-alpha)*CEXP(-alpha*ymax)
+      Uo(3,1) = (alpha**2)*CEXP(-alpha*ymax)
+      Uo(4,1) = (-alpha**3)*CEXP(-alpha*ymax)
+
+      rgamma = SQRT(alpha**2+(0.,1.)*alpha*Re*(1.0-c))
+
+      Uo(1,2) = CEXP(-rgamma*ymax)
+      Uo(2,2) = (-rgamma)*CEXP(-rgamma*ymax)
+      Uo(3,2) = (rgamma**2)*CEXP(-rgamma*ymax)
+      Uo(4,2) = (-rgamma**3)*CEXP(-rgamma*ymax)
+
+      return
+      end
+
+C***********************************************************************
       subroutine FHOMO_VODE(neq,t,yo,yf,rpar,ipar)
 C***********************************************************************
       integer neq
@@ -739,12 +775,13 @@ C***********************************************************************
       complex yo(IPAR(1),IPAR(2)), yf(IPAR(1),IPAR(2))
 c     write(*,*) NEQ, IPAR(1), IPAR(2)
       do m = 1, IPAR(2) 
-        call FHOMO(IPAR(1),yo(1,m),t,yf(1,m))
+        call OS_HOMO(IPAR(1),yo(1,m),t,yf(1,m))
       end do
       return
       end
+
 C***********************************************************************
-      subroutine FHOMO(neq,yo,t,yf)
+      subroutine OS_HOMO(neq,yo,t,yf)
 C***********************************************************************
 C
 C     Function evaluation for the Orr-Sommerfeld equation
@@ -754,12 +791,12 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   rgamma, beta, uspl, d2uspl, ydat
+     &                   beta, uspl, d2uspl, ydat
      
       common      /eig/  c, alpha, Re
 c***********************************************************************
@@ -789,7 +826,7 @@ c
       end
 
 C***********************************************************************
-      subroutine FPART(neq, yo,t,yf)
+      subroutine OS_PART(neq, yo,t,yf)
 C***********************************************************************
 C
 C     Function evaluation for the Orr-Sommerfeld equation
@@ -799,12 +836,12 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   rgamma, beta, uspl, d2uspl, ydat
+     &                   beta, uspl, d2uspl, ydat
      
       common      /eig/  c, alpha, Re
 c***********************************************************************
@@ -845,12 +882,12 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   rgamma, beta, uspl, d2uspl, ydat
+     &                   beta, uspl, d2uspl, ydat
      
       common      /eig/  c, alpha, Re
 c***********************************************************************
@@ -986,15 +1023,6 @@ c     close(10)
       end
 
 C***********************************************************************
-      subroutine BL(y,xi,f)
-C***********************************************************************
-      real y, xi(3), f(3)
-c     write(*,*) "In BL..."
-      call BLASIUS(3,xi,y,f)
-      return
-      end
-
-C***********************************************************************
       subroutine BLASIUS(neq,xi,y,f)
 C***********************************************************************
 C
@@ -1005,12 +1033,12 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=50000)
       integer     nbl
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
       common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   rgamma, beta, uspl, d2uspl, ydat
+     &                   beta, uspl, d2uspl, ydat
      
       common      /eig/  c, alpha, Re
 c***********************************************************************
