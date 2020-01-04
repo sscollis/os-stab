@@ -31,19 +31,17 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=10000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
-     
-      common      /eig/   c
-
-      complex     INPROD
-      external    OSHOMO, OSPART, INPROD
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, c
 c***********************************************************************
       parameter (neq=4)
       complex   bc1(neq), bc2(neq)
       character input*1
+     
+      complex   INPROD
+      external  OSHOMO, OSPART, INPROD
 c
 c     Defaults
 c      
@@ -163,12 +161,10 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=10000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
-     
-      common      /eig/   c
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, c
 c***********************************************************************
       complex     yo(4), yf(4)
       real        t
@@ -200,12 +196,10 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=10000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
-     
-      common      /eig/   c
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, c
 c***********************************************************************
       complex     yo(4), yf(4)
       real        t
@@ -238,12 +232,10 @@ c     Common variables
 c***********************************************************************
       parameter   (imax=10000)
       integer     n
-      complex     alpha, c, rgamma
+      complex     alpha, c
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
-     
-      common      /eig/   c
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, c
 c***********************************************************************
       integer     i, j, k, p
       real        xi(3,imax), f(3), eta(3), y, pi, us, dus, d2us

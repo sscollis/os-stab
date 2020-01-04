@@ -39,10 +39,8 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   beta, uspl, d2uspl, ydat
-     
-      common      /eig/  c, alpha, Re
+      common      /setup/ nbl, alpha, u, d2u, Re, ymin, ymax, h, c,
+     &                    f2p, beta, uspl, d2uspl, ydat
 c***********************************************************************
       parameter (neq=4, inunit=20)
       complex   bc1(neq), bc2(neq)
@@ -258,10 +256,8 @@ C***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   beta, uspl, d2uspl, ydat
-
-      common      /eig/ c, alpha, Re
+      common      /setup/ nbl, alpha, u, d2u, Re, ymin, ymax, h, c,
+     &                    f2p, beta, uspl, d2uspl, ydat
 C***********************************************************************
       complex     rgamma
 C***********************************************************************
@@ -310,10 +306,8 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   beta, uspl, d2uspl, ydat
-     
-      common      /eig/  c, alpha, Re
+      common      /setup/ nbl, alpha, u, d2u, Re, ymin, ymax, h, c,
+     &                    f2p, beta, uspl, d2uspl, ydat
 c***********************************************************************
       integer     neq
       complex     yo(neq), yf(neq)
@@ -355,10 +349,8 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   beta, uspl, d2uspl, ydat
-     
-      common      /eig/  c, alpha, Re
+      common      /setup/ nbl, alpha, u, d2u, Re, ymin, ymax, h, c,
+     &                    f2p, beta, uspl, d2uspl, ydat
 c***********************************************************************
       integer     neq
       complex     yo(neq), yf(neq)
@@ -401,10 +393,8 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   beta, uspl, d2uspl, ydat
-     
-      common      /eig/  c, alpha, Re
+      common      /setup/ nbl, alpha, u, d2u, Re, ymin, ymax, h, c,
+     &                    f2p, beta, uspl, d2uspl, ydat
 c***********************************************************************
       integer     i, j, k, p
       real        xi(3,0:imax), f(3), eta(3), y
@@ -552,10 +542,8 @@ c***********************************************************************
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h, beta
       real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax), f2p
 
-      common      /mean/ nbl, u, d2u, ymin, ymax, h, f2p,
-     &                   beta, uspl, d2uspl, ydat
-     
-      common      /eig/  c, alpha, Re
+      common      /setup/ nbl, alpha, u, d2u, Re, ymin, ymax, h, c,
+     &                    f2p, beta, uspl, d2uspl, ydat
 c***********************************************************************
       integer     neq
       real        xi(neq), f(neq), y
