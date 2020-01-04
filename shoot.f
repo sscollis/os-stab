@@ -6,13 +6,18 @@ C
 C     First order linear boundary value problem solver using Conte's
 C     method.  Fourth order Runge-Kutta is used for time advancement
 C
-C     nstep = number of integration steps between [t0,tf]
-C     n     = number of ODEs to integrate
-C     r     = number of particular solutions 
-C     yo    = starting values
-C     yf    = ending values
-C     to    = Interval start value
-C     tf    = Interval end value
+C     nstep  = number of integration steps between [t0,tf]
+C     n      = number of ODEs to integrate
+C     r      = number of particular solutions 
+C     yo     = starting values
+C     yf     = ending values
+C     to     = Interval start value
+C     tf     = Interval end value
+C     c      = Current eigenvalue
+C     eigfun = Whether to output eigenfunction at the end
+C     FHOMO  = Subroutine for homogeneous equation
+C     FPART  = Subroutin for particular equation
+C     INPROD = Function to compute inner product
 C
 c***********************************************************************
       complex     c
@@ -379,7 +384,22 @@ C***********************************************************************
 C***********************************************************************
 C
 C     First order linear boundary value problem solver using Conte's
-C     method.  Fourth order Runge-Kutta is used for time advancement
+C     method.  Runge-Kutta is used for time advancement but there are
+C     other options available via compile defines
+C
+C     nstep  = number of integration steps between [t0,tf]
+C     n      = number of ODEs to integrate
+C     r      = number of particular solutions 
+C     yo     = starting values
+C     yf     = ending values
+C     to     = Interval start value
+C     tf     = Interval end value
+C     c      = Current eigenvalue
+C     eigfun = Whether to output eigenfunction at the end
+C     FIC    = Subroutine to compute the initial condition
+C     FHOMO  = Subroutine for homogeneous equation
+C     FPART  = Subroutin for particular equation
+C     INPROD = Function to compute inner product
 C
 C***********************************************************************
       integer     i, m, q, r, s, mi, mj, qend, IPVT(n-r), icount, north
