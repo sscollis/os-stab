@@ -104,8 +104,8 @@ all:
 conte: conte.o shoot.o
 	$(FC) $(LIB) shoot.o conte.o -o conte
 
-contebl: contebl.o $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
-	$(FC) $(LIB) contebl.o -o contebl
+contebl: contebl.o shoot.o $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
+	$(FC) $(LIB) shoot.o contebl.o -o contebl
 
 conteucbl: conteucbl.o $(NR_OBJ)
 	$(FC) $(LIB) conteucbl.o -o conteucbl
