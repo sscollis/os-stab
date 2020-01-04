@@ -1108,30 +1108,16 @@ c
         call HUNT (X,N,XX,I)
       END IF
       IOLD = I
-#else
-#if 0
-c
-c     Try out a bubble sort
-c     SSC:  still off by one error?
-c
-      IL = 1-1
-      IR = N-1
-      do while (IL .lt. IR)
-        IM = FLOOR((IL+IR)/2.0)
-        if ( X(IM+1) .lt. XX) then
-          IL = IM + 1
-c        else if ( X(IM+1) .gt. XX) then
-c          IR = IM - 1
-        else 
-c          I = IM+1
-           IR = IM
-c          goto 10
-        end if
-c       write(*,*) IL, IM, IR
-      end do
-      I = IL+1
-c      write(*,*) "Error...", I
-c      stop
+#elif 1
+      I = IOLD
+      IF (XX.EQ.X(1)) THEN
+        I = 1
+      ELSE IF (XX.EQ.X(N)) THEN
+        I = N
+      ELSE
+        call BISECT (X,N,XX,I)
+      ENDiF
+      IOLD = I
 #else
 c
 c     This is really a slow way of searching
@@ -1140,7 +1126,6 @@ c
       DO 1 I=1,NM1
       IF (XX.LE.X(I+1)) GO TO 10
     1 CONTINUE   
-#endif
 #endif
 C-----NOW EVALUATE THE CUBIC   
    10 DXM = XX - X(I)          
@@ -1152,8 +1137,11 @@ C-----NOW EVALUATE THE CUBIC
       RETURN        
       END 
 
+C***********************************************************************
       subroutine BISECT(X,N,XX,I)
+C***********************************************************************
       dimension X(N)
+C***********************************************************************
       il = I-1
       ir = N-1
       do while (ir-il .gt. 1) 
@@ -1167,6 +1155,7 @@ C-----NOW EVALUATE THE CUBIC
       I = il+1
       return
       end
+
 C***********************************************************************
       SUBROUTINE SPDER(N,X,Y,FDP,XX,F,FP,FPP)
 C***********************************************************************
