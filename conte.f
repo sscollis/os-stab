@@ -33,10 +33,8 @@ c***********************************************************************
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
-      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     &                    rgamma, uspl, d2uspl, ydat
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
      
       common      /eig/   c
 
@@ -167,10 +165,8 @@ c***********************************************************************
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
-      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     &                    rgamma, uspl, d2uspl, ydat
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
      
       common      /eig/   c
 c***********************************************************************
@@ -206,10 +202,8 @@ c***********************************************************************
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
-      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     &                    rgamma, uspl, d2uspl, ydat
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
      
       common      /eig/   c
 c***********************************************************************
@@ -246,10 +240,8 @@ c***********************************************************************
       integer     n
       complex     alpha, c, rgamma
       real        U(0:imax), d2U(0:imax), Re, ymin, ymax, h
-      real        Uspl(0:imax), d2Uspl(0:imax), ydat(0:imax)
 
-      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h, 
-     &                    rgamma, uspl, d2uspl, ydat
+      common      /setup/ n, alpha, u, d2u, Re, ymin, ymax, h
      
       common      /eig/   c
 c***********************************************************************

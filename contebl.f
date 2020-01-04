@@ -54,7 +54,7 @@ c***********************************************************************
       character string*80
 
       complex   INPROD
-      external  OSIC, OSHOMO, OSPART, INPROD
+      external  BL_IC, OSHOMO, OSPART, INPROD
 c
 c     Defaults
 c
@@ -200,7 +200,7 @@ c
       end do
       
       call CONTE2(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,c,eigfun,
-     &            OSIC, OSHOMO, OSPART, INPROD)
+     &            BL_IC, OSHOMO, OSPART, INPROD)
 c
 c     Read error
 c      
@@ -241,7 +241,7 @@ c
       end
 
 C***********************************************************************
-      subroutine OSIC(n,r,Uo)
+      subroutine BL_IC(n,r,Uo)
 C***********************************************************************
 C
 C     Set the initial condition at infinity for the Orr-Sommerfeld
