@@ -379,12 +379,13 @@ c
       end
 
 C***********************************************************************
-      subroutine CONTE2(nstep, testalpha, n, r, yo, yf, to, tf, c, 
-     &                  eigfun, FIC, FHOMO, FPART, INPROD)
+      subroutine CONTE_IC(nstep, testalpha, n, r, yo, yf, to, tf, c, 
+     &                    eigfun, FIC, FHOMO, FPART, INPROD)
 C***********************************************************************
 C
 C     First order linear boundary value problem solver using Conte's
-C     method.  Runge-Kutta is used for time advancement but there are
+C     method with a non Dirac function initial condition.  
+C     Runge-Kutta is used for time advancement but there are
 C     other options available via compile defines
 C
 C     nstep  = number of integration steps between [t0,tf]

@@ -197,8 +197,8 @@ c
         bc2(i) = 0.0
       end do
       
-      call CONTE2(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,c,eigfun,
-     &            BL_IC, OSHOMO, OSPART, INPROD)
+      call CONTE_IC(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,c,eigfun,
+     &              BL_IC, OSHOMO, OSPART, INPROD)
 c
 c     Read error
 c      
