@@ -1,5 +1,5 @@
 C***********************************************************************
-      subroutine CONTE(nstep, n, r, yo, yf, to, tf, c,
+      subroutine CONTE(nstep, n, r, yo, yf, to, tf, c, eigfun,
      &                 FHOMO, FPART, INPROD)
 C***********************************************************************
 C
@@ -39,7 +39,6 @@ c
       errtol = 1.0e-15
       maxcount = 20
       eigtol = 1.0e-15
-      eigfun = .true.
 c
 c     set the normalization constraint
 c
@@ -433,7 +432,6 @@ c
       errtol = 1.0e-14
       maxcount = 20
       eigtol = 1.0e-14
-      eigfun = .true.
 c
 c     set the normalization constraint
 c

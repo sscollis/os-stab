@@ -115,7 +115,7 @@ c
         bc2(i) = 0.0
       end do
       
-      call CONTE(n, neq, 2, bc1, bc2, ymin, ymax, c, 
+      call CONTE(n, neq, 2, bc1, bc2, ymin, ymax, c, .true.,
      &           OSHOMO, OSPART, INPROD)
 
  210  continue      
