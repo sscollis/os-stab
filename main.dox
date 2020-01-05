@@ -1,0 +1,16 @@
+/**
+\mainpage Introduction and Overview 
+
+\section OS_Overview Overview
+
+This is a collection of solvers for the incompressible Orr-Sommerfled equation
+\f[ \frac{du_1}{dy}(y) = u_2(y) \f]
+\f[ \frac{du_2}{dy}(y) = u_3(y) \f]
+\f[ \frac{du_3}{dy}(y) = u_4(y) \f]
+\f[ \frac{du_4}{dy}(y) = 2 \alpha^2 u_3(y) - \alpha^4 u_1(y) + 
+    \iota\alpha Re \left[ \left(U(y)-c\right)\left(u_3(y) - \alpha^2 u_1(y)\right) - 
+                          \frac{d^2U}{dy^2} u_1(y) \right] \f]
+where \f$Re\f$ is the Reynolds number, \f$\alpha\f$ is the spatial wavenumber in the streamwise direction \f$x\f$,
+\f$U(y)\f$ is the mean velocity profile, \f$u(y)\f$ is the complex valued eigenvector, 
+\f$c\f$ is the complex eigenvalue, and \f$y\f$ is the crossstream (wall normal) direction.
+**/

@@ -1,42 +1,45 @@
-C***********************************************************************
+C> \file shoot.f
+C> \brief Solver routines for eigenvalue shooting and utilities 
+C> \author S. Scott Collis
+
+C> \author S. Scott Collis
+C> \brief Solve eigenvalue problem using Godonov-Conte method
+C> \details First order linear boundary value problem solver 
+C> using Conte's method.  Fourth order Runge-Kutta is used for 
+C> time advancement
+C> \param[in] nstep   number of integration steps between t0 and tf
+C> \param[in] n       number of ODEs to integrate
+C> \param[in] r       number of particular solutions 
+C> \param[in] yo      starting values
+C> \param[in] yf      ending values
+C> \param[in] to      Interval start value
+C> \param[in] tf      Interval end value
+C> \param[in,out] c   Current eigenvalue
+C> \param[in] eigfun  Whether to output eigenfunction at the end
+C> \param[in] FHOMO   Subroutine for homogeneous equation
+C> \param[in] FPART   Subroutine for particular equation
+C> \param[in] INPROD  Function to compute inner product
       subroutine CONTE(nstep, n, r, yo, yf, to, tf, c, eigfun,
      &                 FHOMO, FPART, INPROD)
-C***********************************************************************
-C
-C     First order linear boundary value problem solver using Conte's
-C     method.  Fourth order Runge-Kutta is used for time advancement
-C
-C     nstep  = number of integration steps between [t0,tf]
-C     n      = number of ODEs to integrate
-C     r      = number of particular solutions 
-C     yo     = starting values
-C     yf     = ending values
-C     to     = Interval start value
-C     tf     = Interval end value
-C     c      = Current eigenvalue
-C     eigfun = Whether to output eigenfunction at the end
-C     FHOMO  = Subroutine for homogeneous equation
-C     FPART  = Subroutin for particular equation
-C     INPROD = Function to compute inner product
-C
-c***********************************************************************
+      integer     nstep, n, r
+      complex     yo(n), yf(n)
+      real        to, tf, h
       complex     c
-      integer     i, m, q, r, s, mi, mj, qend, IPVT(n-r), icount
-      real        t, tq(0:nstep), to, tf, h
-      complex     yo(n), yf(n), B(n-r,0:nstep), err, cold, ctemp
-      complex     U(n,n-r,0:nstep), P(n-r,n-r,0:nstep), z(n,n-r)
-      complex     y(n,0:nstep), v(n,0:nstep), w(n), omega(n,0:nstep)
-      complex     eta(n),A(n,n-r),x(n),FAC(n-r,n-r), det1, det
-      complex     olderr, ut(n,n-r), fd, vmax
-
-      complex     cm1, cm2, errm1, errm2, qt, At, Bt, Ct, Utemp(n)
-
-      real        test, testalpha, pi, det2, AI(n,n-r), angle
-      real        aa, bb, cc, fdxr, fdxi, fdyr, fdyi
-      logical     norm, eigfun 
+      logical     eigfun
       complex     INPROD
       external    INPROD, FHOMO, FPART
 
+      integer     i, m, q, s, mi, mj, qend, IPVT(n-r), icount
+      real        t, tq(0:nstep)
+      complex     B(n-r,0:nstep), err, cold, ctemp
+      complex     U(n,n-r,0:nstep), P(n-r,n-r,0:nstep), z(n,n-r)
+      complex     y(n,0:nstep), v(n,0:nstep), w(n), omega(n,0:nstep)
+      complex     eta(n), A(n,n-r), x(n), FAC(n-r,n-r), det1, det
+      complex     olderr, ut(n,n-r), fd, vmax
+      complex     cm1, cm2, errm1, errm2, qt, At, Bt, Ct, Utemp(n)
+      real        test, testalpha, pi, det2, AI(n,n-r), angle
+      real        aa, bb, cc, fdxr, fdxi, fdyr, fdyi
+      logical     norm
       real        errtol, maxcount, eigtol
 c
 c     initialize variables
@@ -403,7 +406,8 @@ C     FPART  = Subroutin for particular equation
 C     INPROD = Function to compute inner product
 C
 C***********************************************************************
-      integer     i, m, q, r, s, mi, mj, qend, IPVT(n-r), icount, north
+      integer     nstep, n, r
+      integer     i, m, q, s, mi, mj, qend, IPVT(n-r), icount, north
       real        t, tq(0:nstep), to, tf, h 
       complex     yo(n), yf(n), B(n-r,0:nstep), err, c, cold, ctemp
       complex     U(n,n-r,0:nstep), P(n-r,n-r,0:nstep), z(n,n-r)
@@ -415,10 +419,8 @@ C***********************************************************************
       real        test, testalpha, pi, det2, AI(n,n-r)
       real        fdxr, fdxi, fdyr, fdyi
       logical     norm, eigfun
-
       complex     INPROD
       external    INPROD, FIC, FHOMO, FPART
-
       real        errtol, maxcount, eigtol
 #ifdef USE_NR_ODEINT
       external    RKQC
@@ -805,12 +807,20 @@ c
       end
 
 C***********************************************************************
+C>    \brief Advance one time step using fourth order (real) Runge-Kutta
+C>    \param[in] neq number of equations
+C>    \param[in] yo initial value
+C>    \param[out] yf final value
+C>    \param[in] to intial time
+C>    \param[in] h time step
+C>    \param[in] FUNC function to integrate
+C***********************************************************************
       subroutine SRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
 C
 C     Advance one time step using fourth order (real) Runge-Kutta
 C
-c***********************************************************************
+C***********************************************************************
       external    FUNC
       integer     neq
       real        to, h
@@ -841,6 +851,14 @@ c***********************************************************************
       return
       end
 
+C***********************************************************************
+C>    \brief Advance one time step using fourth order (real) Runge-Kutta
+C>    \param[in] neq number of equations
+C>    \param[in] yo initial value
+C>    \param[out] yf final value
+C>    \param[in] to intial time
+C>    \param[in] h time step
+C>    \param[in] FUNC function to integrate
 C***********************************************************************
       subroutine CRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
@@ -1024,7 +1042,9 @@ C-----XX = VALUE OF INDEPENDENT VARIABLE FOR WHICH
 C-----     AN INTERPOLATED VALUE IS REQUESTED      
 C-----F =  THE INTERPOLATED RESULT       
 C-----FP = THE INTERPOLATED DERIVATIVE RESULT       
+      INTEGER N
       DIMENSION X(N),Y(N),FDP(N)
+      REAL XX, F, FP, FPP
 C-----THE FIRST JOB IS TO FIND THE PROPER INTERVAL.          
 #if USE_NR_HUNT
 c

@@ -1,4 +1,17 @@
 c***********************************************************************
+c> \file conte.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible channel
+c> \author S. Scott Collis
+c***********************************************************************
+C> \brief Orr-Sommerfeld solver for channel flow
+C> \details Main program to solve the Orr-Sommerfeld equation for 
+C>          incompressible Channel flow
+C>          Uses the method of Godonov-Conte orthonormalization with
+C>          explicit Runge-Kutta time integration.
+C>          Reference:  S.D. Conte, SIAM Review, v8, n3, July 1966
+C>           "The Numerical Solution of Linear Boundary Value
+C>           Problems"
+c***********************************************************************
       program conte_chan
 c***********************************************************************
 c 
@@ -10,7 +23,7 @@ c
 c     Citation: Follows the method of S.D. Conte in 
 c               SIAM Review, v8, n3, July 1966
 c               "The Numerical Solution of Linear Boundary Value
-c                Problems"
+c               Problems"
 c
 c     Output:   Complex valued eigenfunction is phi 
 c
@@ -123,6 +136,13 @@ c
       end
 
 C***********************************************************************
+C> \brief Defines the inner product for use in orthonormalization
+C> \details Returns the value of \f$ v_1 \cdot v_2 \f$
+C> \param n length of vectors
+C> \param v1 first vector
+C> \param v2 second vector
+C> \return possibly complex valued inner product
+C***********************************************************************
       function INPROD(n, v1, v2)
 C***********************************************************************
 C
@@ -150,6 +170,12 @@ c
       return
       end
 
+C***********************************************************************
+C> \brief Evaluate the homogeneous Orr-Sommerfeld equation
+C> \param[in] neq number of equations
+C> \param[in] yo Current state vector
+C> \param[in] t  Current independent variable
+C> \param[out] yf Function evaluation
 C***********************************************************************
       subroutine OSHOMO(neq,yo,t,yf)
 C***********************************************************************
@@ -186,6 +212,12 @@ c
       end
 
 C***********************************************************************
+C> \brief Evaluate the homogeneous Orr-Sommerfeld equation
+C> \param[in] neq number of equations
+C> \param[in] yo Current state vector
+C> \param[in] t  Current independent variable
+C> \param[out] yf Function evaluation
+C***********************************************************************
       subroutine OSPART(neq,yo,t,yf)
 C***********************************************************************
 C
@@ -220,6 +252,8 @@ c
       return
       end
 
+C***********************************************************************
+C> \brief Set the mean flow 
 C***********************************************************************
       subroutine SET_MEAN_FLOW 
 C***********************************************************************
@@ -267,6 +301,12 @@ c     close(10)
       return
       end
 
+C***********************************************************************
+C> \brief The analytic profile for incompressible channel flow
+C> \param[in] y location to evaluate profile \f$[-1,1]\f$
+C> \param[out] u velocity at \f$y\f$ 
+C> \param[out] dudy derivative of velocity at \f$y\f$ 
+C> \param[out] d2udy2 second derivative of velocity at \f$y\f$
 C***********************************************************************
       subroutine CHANNEL(y,u,dudy,d2udy2)
 C***********************************************************************

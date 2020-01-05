@@ -1,4 +1,9 @@
 c***********************************************************************
+c> \file contebl.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible boundary
+c>        layers solving first the Blasius equation 
+c> \author S. Scott Collis
+c***********************************************************************
       program conte_bl
 c***********************************************************************
 c 
