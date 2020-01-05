@@ -1,36 +1,4 @@
-/**
-\mainpage Introduction and Overview 
-
-\section OS_Overview Overview
-
-This is a collection of solvers for the incompressible Orr-Sommerfled equation
-\f[ \frac{du_1}{dy}(y) = u_2(y) \f]
-\f[ \frac{du_2}{dy}(y) = u_3(y) \f]
-\f[ \frac{du_3}{dy}(y) = u_4(y) \f]
-\f[ \frac{du_4}{dy}(y) = 2 \alpha^2 u_3(y) - \alpha^4 u_1(y) + 
-    \iota\alpha Re \left[ \left(U(y)-c\right)\left(u_3(y) - 
-                          \alpha^2 u_1(y)\right) - 
-                          \frac{d^2U}{dy^2} u_1(y) \right] \f]
-where \f$Re\f$ is the Reynolds number, \f$\alpha\f$ is the spatial wavenumber 
-in the streamwise direction \f$x\f$, \f$U(y)\f$ is the mean velocity profile, 
-\f$u(y)\f$ is the complex valued eigenvector, \f$c\f$ is the complex 
-eigenvalue, and \f$y\f$ is the crossstream (wall normal) direction.
-
-Solvers are also provided to solve the Blasius equation for boundary-layer 
-velocity profiles as well as specific solvers to find the neutral curve 
-for a given profile.
-
-\section OS_Author Primary Contact
-
-S. Scott Collis, Ph.D.<br>
-sscollis@gmail.com
-
-\section OS_Copyright Copyright and License
-
-iOrrSom is released as open source under the following license:
-
-Copyright (c) 2020, S. Scott Collis 
-
+Copyright (c) 2020, S. Scott Collis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -54,5 +22,3 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-**/

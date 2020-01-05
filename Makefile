@@ -101,6 +101,12 @@ all:
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
 
+docs:
+	doxygen
+
+clean-docs:
+	/bin/rm -rf html latex
+
 conte: conte.o shoot.o
 	$(FC) $(LIB) shoot.o conte.o -o conte
 
