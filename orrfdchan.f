@@ -714,6 +714,7 @@ c***********************************************************************
       complex     T3(0:idim,0:idim), T4(0:idim,0:idim)
       complex     beta(0:idim), evec(0:idim,0:idim), temp3(0:idim)
       complex     evec2(0:idim,0:idim), eval(0:idim)
+      complex     avec(0:idim,0:idim)
       complex     P1(0:idim,0:idim), P2(0:idim,0:idim)
       complex     eigenvalue, eigenvector(0:idim)
       real        temp1(0:idim), temp2(0:idim), residual
@@ -722,6 +723,11 @@ c***********************************************************************
       integer     ind(0:idim)
       logical     first, print
       external    CHECKEIG
+      complex     escale
+
+      integer     info, lwork, ipvt(0:idim)
+      complex     work(16*(idim+1))
+      real        rwork(8*(idim+1))
 C***********************************************************************
       lda = idim+1
       ldb = idim+1
@@ -751,14 +757,29 @@ c     But the top and bottom rows are trivial so that they can be
 c     removed
 c
 #ifdef USE_IMSL
-      write(*,*) "Solving Eigenvalue Problem with ISML interface"
+c     write(*,*) "Solving Eigenvalue Problem with ISML interface"
       CALL LINCG (N-1, B, LDA, T1, LDA)
       CALL MCRCR (N-1, N-1, T1, LDA, N-1, N-1, A, LDA,
      .            N-1, N-1, T4, LDA)
-
       CALL EVCCG (N-1, T4, LDA, eval, evec, ldevec)
 #else
-      write(*,*) "Solving Eigenvalue Problem with new LAPACK interface"
+c     write(*,*) "Solving Eigenvalue Problem with new LAPACK interface"
+      LWORK = 16*(idim+1)
+      INFO = 0
+      call ZGEGV( 'V', 'V', N-1, A, LDA, B, LDA, alp, beta, avec,
+     .             LDA, evec, LDA, work, lwork, rwork, info)
+c     write(*,*) "Finished eigenvalue solve"
+c
+c.... compute the eigenvalues
+c
+      do i = 0, N-2
+        if (beta(i).ne.0) then
+          eval(i) = alp(i)/beta(i)
+        else
+          eval(i) = 0.0
+        end if
+      end do
+#if 0
       LWORK = 2*(N-1)
       INFO = 0
       CALL ZLACPY('A', N-1, N-1, B, LDA, T1, LDA)
@@ -767,6 +788,7 @@ c
       CALL ZGEMM ('N','N',N-1,N-1,N-1,1.0,T1,LDA,A,LDA,0.0,T4,LDA)
       CALL ZGEEV ('N','V',N-1, T4, LDA, eval, VL, LDVL, evec, ldevec,
      .            WORK, LWORK, RWORK, INFO)
+#endif
 #endif
 c
       do i = 0, N-2 
@@ -797,12 +819,12 @@ c     Must watch out, this routine isn't very robust.
       do j = 0, n-2
         eigenvector(j) = evec(j,ind(iloc))
       end do
-      
+#ifdef ORR_CHECK_EIG 
       residual = CHECKEIG (N-1,T4,lda,eigenvalue,eigenvector)
       if (residual .gt. .01) then
         write (*,*) 'WARNING eigenvalue not converged!'
       end if
-
+#endif
       if (print) then
         write (*,100) residual
  100    format (/,1x,'Residual = ',f17.10)
@@ -815,6 +837,20 @@ c     Must watch out, this routine isn't very robust.
         write (*,40)
         read (*,*) which
           do while (which .ne. 0)
+c
+c.... normalize the eigenvector
+c
+#if 1
+          escale = 0.0
+          do i = 1, N-1
+            if (abs(evec(i-1,ind(iloc))) .gt. abs(escale)) then
+              escale = evec(i-1,ind(iloc))
+            endif
+          end do
+          write(*,*) "escale = ", escale
+          escale = 1.0/(escale)
+          call zscal( N-1, escale, evec(0,ind(iloc)), 1)
+#endif
           temp1(0) = 0.0
           temp2(0) = 0.0
           temp1(n) = 0.0
@@ -822,8 +858,12 @@ c     Must watch out, this routine isn't very robust.
           do j = 1, n-1
             temp1(j) = REAL(evec(j-1,ind(iloc)))
             temp2(j) = AIMAG(evec(j-1,ind(iloc)))
-            write (*,60) eta(j), temp1(j), temp2(j)
           end do
+          open(11)
+          do j = 0, N
+            write (11,60) eta(j), temp1(j), temp2(j)
+          end do
+          close(11)
           write (*,40)
           read (*,*) which
         end do
@@ -835,7 +875,7 @@ c     Must watch out, this routine isn't very robust.
  36   format(1x,2(e17.10,4x))
  40   format(/,1x,'Eigenvector for which eigenvalue (0 quits) ==> ',$)
  55   format(/,1x,'Performance Index = ',g12.5,/)
- 60   format(1x,3(e17.10,4x))
+ 60   format(1x,6(ES16.8E3,1x))
      
       return
       end

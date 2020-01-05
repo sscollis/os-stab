@@ -13,7 +13,7 @@ c
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=128)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -77,7 +77,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=128)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -157,7 +157,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=128)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -201,7 +201,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=128)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -265,7 +265,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=128)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -349,7 +349,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=128)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -386,7 +386,7 @@ c***********************************************************************
       complex     work(16*(idim+1))
       real        rwork(8*(idim+1))
 
-      complex     zdotc, scale
+      complex     zdotc, escale
       external    zdotc
 C***********************************************************************
       lwork = 16*(idim+1)
@@ -433,10 +433,10 @@ c      CALL EVCCG (N-1, T4, LDA, eval, evec, ldevec)
          call ZGETRF(n+1, n+1, B, lda, ipvt, info)
          call ZGETRS('N', n+1, n+1, B, lda, ipvt, A, lda, info)
          call ZGEEV('V', 'V', n+1, A, lda, eval, avec,
-     .        lda, evec, lda, work, lwork, rwork, info)
+     .              lda, evec, lda, work, lwork, rwork, info)
       else
-         call ZGEGV( 'V', 'V', N+1, A, LDA, B, LDA, alp, beta, avec, LDA, 
-     .        evec, LDA, work, lwork, rwork, info)
+         call ZGEGV( 'V', 'V', N+1, A, LDA, B, LDA, alp, beta, avec, 
+     .               LDA, evec, LDA, work, lwork, rwork, info)
 c
 c.... compute the eigenvalues
 c
@@ -487,7 +487,8 @@ c
      .               REAL(omega(i)/alpha), IMAG(omega(i)/alpha)
   35    format (1x,i5,2x,4(1pe17.10,1x))
       end do
-      
+     
+      escale = 0.0 
       write (*,40)
       read (*,*) which
       do while (which .ne. -1)
@@ -501,39 +502,45 @@ c
 c.... normalize the eigenvector
 c
         do i = 0, N
-           if (abs(evec(i,which)) .gt. abs(scale)) scale = evec(i,which)
+          if (abs(evec(i,which)) .gt. abs(escale)) then
+            escale = evec(i,which)
+          endif
         end do
-        scale = 1.0/(scale)
-        call zscal( N+1, scale, evec(0,which), 1)
+        escale = 1.0/(escale)
+        call zscal( N+1, escale, evec(0,which), 1)
 c
 c.... check the orthogonality of the adjoint and regular eigenvectors
 c
-        scale = zdotc( N+1, avec(0,which), 1, evec(0,which), 1 )
-        write(*,*) scale
+        escale = zdotc( N+1, avec(0,which), 1, evec(0,which), 1 )
+        write(*,*) escale
 c
 c.... scale the adjoint by the inner product
 c
-        scale = 1.0/conjg(scale)
-        call zscal( N+1, scale, avec(0,which), 1)
-        scale = zdotc( N+1, avec(0,which), 1, evec(0,which), 1 )
-        write(*,*) scale
+        escale = 1.0/conjg(escale)
+        call zscal( N+1, escale, avec(0,which), 1)
+        escale = zdotc( N+1, avec(0,which), 1, evec(0,which), 1 )
+        write(*,*) escale
 
 c       call CHEBYSHEV(temp1,n,1)
 c       call CHEBYSHEV(temp2,n,1)
-        do i = 0, n
-          write (10,999) eta(i), real(evec(i,which)), 
-     .                   imag(evec(i,which)), real(avec(i,which)),
-     .                   imag(avec(i,which))
- 999      format (6(e12.5,2x))
+        open(10)
+        do i = 0, N
+          write (11,999) eta(i), 
+     .                   real(evec(i,which)), aimag(evec(i,which)), 
+     .                   real(avec(i,which)), aimag(avec(i,which))
+ 999      format (1x,6(ES16.8E3,1x))
         end do
+        close(11)
 c
 c.... Interpolate to a finer mesh
 c       
-c       do i = 1, n
-c         temp1(i) = REAL(avec(i,which))
-c         temp2(i) = IMAG(avec(i,which))
-c       end do
-c       call CHEBYINT(n, temp1, temp2, 256)
+        if (.false.) then
+         do i = 1, n
+           temp1(i) = REAL(avec(i,which))
+           temp2(i) = IMAG(avec(i,which))
+         end do
+         call CHEBYINT(n, temp1, temp2, 256)
+         end if
  
         write (*,40)
         read (*,*) which
@@ -574,7 +581,7 @@ C
 C     Check an eigenvalue and eigenvector
 C
 C***********************************************************************
-      PARAMETER (idim=128)
+      PARAMETER (idim=512)
       
       integer    N
       complex    A(LDA,N), EVAL, EVEC(N)
@@ -603,7 +610,7 @@ C***********************************************************************
       INTEGER N
       REAL Y(0:N), DY(0:N)
 
-      PARAMETER (idim=128)
+      PARAMETER (idim=512)
       REAL WORK(0:IDIM)
 
       IF (N.GT.IDIM) THEN
@@ -651,7 +658,7 @@ C     returned in real space in YI and Y is unscathed.
 C
 C***********************************************************************
       REAL Y(0:N), YI(0:N+1)
-      PARAMETER (idim=128)
+      PARAMETER (idim=512)
       REAL WORK(0:IDIM)
       
       DO I = 0, N
@@ -895,7 +902,7 @@ C
 C     Calculation the Chebyshev collocation derivative matrix
 C
 C**************************************************************************
-      PARAMETER (IDIM=256)
+      PARAMETER (IDIM=512)
       REAL      D(0:LDD1,0:N), PI
       REAL      C(0:IDIM)
 
