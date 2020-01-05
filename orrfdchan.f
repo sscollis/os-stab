@@ -13,7 +13,7 @@ c
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -144,7 +144,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -202,7 +202,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -267,7 +267,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -347,7 +347,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -435,7 +435,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -556,7 +556,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -690,7 +690,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=256)
+      parameter   (idim=512)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -940,7 +940,7 @@ C***********************************************************************
       INTEGER N
       REAL Y(0:N), DY(0:N)
 
-      PARAMETER (idim=256)
+      PARAMETER (idim=512)
       REAL WORK(0:IDIM)
 
       IF (N.GT.IDIM) THEN
@@ -988,7 +988,7 @@ C     returned in real space in YI and Y is unscathed.
 C
 C***********************************************************************
       REAL Y(0:N), YI(0:N+1)
-      PARAMETER (idim=256)
+      PARAMETER (idim=512)
       REAL WORK(0:IDIM)
       
       DO I = 0, N
@@ -1227,7 +1227,7 @@ C
 C     Calculation the finite difference derivative matrix
 C
 C******************************************************************************
-      PARAMETER (IDIM=256)
+      PARAMETER (IDIM=512)
       REAL      D(0:LDD1,0:N), PI, eta(0:n)
       REAL      C(0:IDIM), DX
 
@@ -1261,7 +1261,7 @@ C
 C     Calculation the Chebyshev collocation derivative matrix
 C
 C******************************************************************************
-      PARAMETER (IDIM=256)
+      PARAMETER (IDIM=512)
       REAL      D(0:LDD1,0:N), PI
       REAL      C(0:IDIM)
 
