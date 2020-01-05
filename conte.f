@@ -6,7 +6,7 @@ c***********************************************************************
 C> \brief Orr-Sommerfeld solver for channel flow
 C> \details Main program to solve the Orr-Sommerfeld equation for 
 C>          incompressible Channel flow
-C>          Uses the method of Godonov-Conte orthonormalization with
+C>          Uses the method of Godunov-Conte orthonormalization with
 C>          explicit Runge-Kutta time integration.
 C>          Reference:  S.D. Conte, SIAM Review, v8, n3, July 1966
 C>           "The Numerical Solution of Linear Boundary Value

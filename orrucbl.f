@@ -1,3 +1,7 @@
+C> \file orrucbl.f
+C> \brief Solves Orr-Sommerfeld using method of Deissler 
+C> \author S. Scott Collis
+c***********************************************************************
       program orr_uc_bl
 c***********************************************************************
 c

@@ -1,6 +1,15 @@
 /**
 \mainpage Introduction and Overview 
 
+\htmlonly
+<b>Table of Contents</b>
+<ul>
+<li> <a href="index.html#OS_Overview">Overview</a>
+<li> <a href="index.html#OS_Author">Primary Contact</a>
+<li> <a href="index.html#OS_Copyright">Copyright and License</a>
+</ul>
+\endhtmlonly
+
 \section OS_Overview Overview
 
 This is a collection of solvers for the incompressible Orr-Sommerfled equation
@@ -19,6 +28,10 @@ eigenvalue, and \f$y\f$ is the crossstream (wall normal) direction.
 Solvers are also provided to solve the Blasius equation for boundary-layer 
 velocity profiles as well as specific solvers to find the neutral curve 
 for a given profile.
+
+The several different algorithms are implemented for solving the Orr-Sommerfeld
+equation using using spectral collocation and the pseudo-orthonormalization
+of Godunov-Conte. 
 
 \section OS_Author Primary Contact
 

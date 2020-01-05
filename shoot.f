@@ -4,7 +4,7 @@ C> \author S. Scott Collis
 C***********************************************************************
 C> \author S. Scott Collis
 C>
-C> \brief Solve eigenvalue problem using Godonov-Conte method
+C> \brief Solve eigenvalue problem using Godunov-Conte method
 C>
 C> \details First order linear boundary value problem solver 
 C> using Conte's method.  Fourth order Runge-Kutta is used for 

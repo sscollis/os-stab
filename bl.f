@@ -1,3 +1,8 @@
+C> \file bl.f
+C> \brief Solve the Blasius equation using spectral collocation
+C> \author S. Scott Collis
+
+c******************************************************************************
       program Solve_Similar_BL
 c******************************************************************************
 c

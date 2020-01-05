@@ -1,3 +1,6 @@
+C> \file conteucbl.f
+C> \brief Solve OS saddle point problem shifting reference frame 
+C> \author S. Scott Collis
 c***********************************************************************
       program conte_uc_bl
 c***********************************************************************
