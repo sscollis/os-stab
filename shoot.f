@@ -1,12 +1,15 @@
 C> \file shoot.f
 C> \brief Solver routines for eigenvalue shooting and utilities 
 C> \author S. Scott Collis
-
+C***********************************************************************
 C> \author S. Scott Collis
+C>
 C> \brief Solve eigenvalue problem using Godonov-Conte method
+C>
 C> \details First order linear boundary value problem solver 
 C> using Conte's method.  Fourth order Runge-Kutta is used for 
 C> time advancement
+C>
 C> \param[in] nstep   number of integration steps between t0 and tf
 C> \param[in] n       number of ODEs to integrate
 C> \param[in] r       number of particular solutions 
@@ -19,8 +22,10 @@ C> \param[in] eigfun  Whether to output eigenfunction at the end
 C> \param[in] FHOMO   Subroutine for homogeneous equation
 C> \param[in] FPART   Subroutine for particular equation
 C> \param[in] INPROD  Function to compute inner product
+C***********************************************************************
       subroutine CONTE(nstep, n, r, yo, yf, to, tf, c, eigfun,
      &                 FHOMO, FPART, INPROD)
+C***********************************************************************
       integer     nstep, n, r
       complex     yo(n), yf(n)
       real        to, tf, h
@@ -28,7 +33,7 @@ C> \param[in] INPROD  Function to compute inner product
       logical     eigfun
       complex     INPROD
       external    INPROD, FHOMO, FPART
-
+C***********************************************************************
       integer     i, m, q, s, mi, mj, qend, IPVT(n-r), icount
       real        t, tq(0:nstep)
       complex     B(n-r,0:nstep), err, cold, ctemp
@@ -41,6 +46,7 @@ C> \param[in] INPROD  Function to compute inner product
       real        aa, bb, cc, fdxr, fdxi, fdyr, fdyi
       logical     norm
       real        errtol, maxcount, eigtol
+C***********************************************************************
 c
 c     initialize variables
 c
