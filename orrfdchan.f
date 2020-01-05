@@ -94,13 +94,13 @@ c     read (*,*) Lmap
       nx = nar
       ny = nai
       iloc = index(filename,' ')-1
-      open (unit=10,file=filename(1:iloc)//'.g',form='unformatted',
+      open (unit=10,file=filename(1:iloc)//'.g',form='formatted',
      .      status='unknown')
-      write (10) nx, ny
- 100  format(i5,1x,$)
-      write (10) ((alphar(i), i=1,nx), j=1,ny),
-     .           ((alphai(j), i=1,nx), j=1,ny)
- 110  format (1x,e15.8,$)
+      write (10,100) nx, ny
+ 100  format(5(i5,1x))
+      write (10,110) ((alphar(i), i=1,nx), j=1,ny),
+     .               ((alphai(j), i=1,nx), j=1,ny)
+ 110  format (5(ES16.8E3,1x))
       close (10)
       open (unit=12,file=filename(1:iloc)//'.dat',form='formatted',
      .      status='unknown')
@@ -121,14 +121,14 @@ c     read (*,*) Lmap
         end do
       end do
 
-      open (unit=11,file=filename(1:iloc)//'.q',form='unformatted',
+      open (unit=11,file=filename(1:iloc)//'.q',form='formatted',
      .      status='unknown')
-      write (11) nx, ny
-      write (11) 0.0,0.0,0.0,0.0
-      write (11) ((1.0                   , i=1,nx), j=1,ny),
-     .           ((real(eigenvalue(i,j)) , i=1,nx), j=1,ny),
-     .           ((aimag(eigenvalue(i,j)), i=1,nx), j=1,ny),
-     .           ((1.0                   , i=1,nx), j=1,ny)
+      write (11,100) nx, ny
+      write (11,110) 0.0,0.0,0.0,0.0
+      write (11,110) ((1.0                   , i=1,nx), j=1,ny),
+     .               ((real(eigenvalue(i,j)) , i=1,nx), j=1,ny),
+     .               ((aimag(eigenvalue(i,j)), i=1,nx), j=1,ny),
+     .               ((1.0                   , i=1,nx), j=1,ny)
       close (11)
       
       stop
@@ -718,20 +718,21 @@ c***********************************************************************
       complex     P1(0:idim,0:idim), P2(0:idim,0:idim)
       complex     eigenvalue, eigenvector(0:idim)
       real        temp1(0:idim), temp2(0:idim), residual
-      integer     lda, ldb, ldevec, p, i, j, which, k, l, m
+      integer     lda, ldb, ldevec, ldavec, p, i, j, which, k, l, m
       real        rind(0:idim)
       integer     ind(0:idim)
       logical     first, print
       external    CHECKEIG
       complex     escale
 
-      integer     info, lwork, ipvt(0:idim)
-      complex     work(16*(idim+1))
-      real        rwork(8*(idim+1))
+      integer     INFO, LWORK, IPIV(0:idim)
+      complex     WORK(16*(idim+1))
+      real        RWORK(8*(idim+1))
 C***********************************************************************
-      lda = idim+1
-      ldb = idim+1
-      ldevec = idim+1
+      LDA = idim+1
+      LDB = idim+1
+      LDEVEC = idim+1
+      LDAVEC = idim+1
       
       do i = 1, n-1
         do j = 1, n-1
@@ -763,14 +764,16 @@ c     write(*,*) "Solving Eigenvalue Problem with ISML interface"
      .            N-1, N-1, T4, LDA)
       CALL EVCCG (N-1, T4, LDA, eval, evec, ldevec)
 #else
-c     write(*,*) "Solving Eigenvalue Problem with new LAPACK interface"
+#ifdef OS_USE_GENERALIZED_EIGENSOLVER
+c
+c.... use generalized eigenvalue solver
+c
       LWORK = 16*(idim+1)
       INFO = 0
       call ZGEGV( 'V', 'V', N-1, A, LDA, B, LDA, alp, beta, avec,
      .             LDA, evec, LDA, work, lwork, rwork, info)
-c     write(*,*) "Finished eigenvalue solve"
 c
-c.... compute the eigenvalues
+c.... compute the eigenvalues (given generalized eigenvalues)
 c
       do i = 0, N-2
         if (beta(i).ne.0) then
@@ -779,18 +782,17 @@ c
           eval(i) = 0.0
         end if
       end do
-#if 0
+#else
       LWORK = 2*(N-1)
       INFO = 0
       CALL ZLACPY('A', N-1, N-1, B, LDA, T1, LDA)
       CALL ZGETRF(N-1, N-1, T1, LDA, IPIV, INFO)
       CALL ZGETRI(N-1, T1, LDA, IPIV, WORK, LWORK, INFO)
-      CALL ZGEMM ('N','N',N-1,N-1,N-1,1.0,T1,LDA,A,LDA,0.0,T4,LDA)
-      CALL ZGEEV ('N','V',N-1, T4, LDA, eval, VL, LDVL, evec, ldevec,
-     .            WORK, LWORK, RWORK, INFO)
+      CALL ZGEMM('N','N',N-1,N-1,N-1,1.0,T1,LDA,A,LDA,0.0,T4,LDA)
+      CALL ZGEEV('N','V',N-1, T4, LDA, eval, avec, LDAVEC, 
+     &           evec, LDEVEC, WORK, LWORK, RWORK, INFO)
 #endif
 #endif
-c
       do i = 0, N-2 
         temp1(i) = REAL(eval(i))
         temp2(i) = AIMAG(eval(i))
@@ -809,7 +811,7 @@ c     Must watch out, this routine isn't very robust.
       first = .true.
       do i = n-2,0,-1
         if ((abs(temp2(i)).lt. 10.0).and.(first).and.
-     .      (int(temp1(ind(i))).ne.999)) then
+     &      (int(temp1(ind(i))).ne.999)) then
           first = .false.
           eigenvalue = cmplx(temp1(ind(i)),temp2(i))
           iloc = i
@@ -836,11 +838,11 @@ c     Must watch out, this routine isn't very robust.
         end do
         write (*,40)
         read (*,*) which
-          do while (which .ne. 0)
-c
-c.... normalize the eigenvector
-c
+        do while (which .ne. 0)
 #if 1
+c
+c.... normalize the eigenvector for output
+c
           escale = 0.0
           do i = 1, N-1
             if (abs(evec(i-1,ind(iloc))) .gt. abs(escale)) then
