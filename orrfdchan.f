@@ -780,7 +780,7 @@ c
       CALL ZGETRF(N-1, N-1, T1, LDA, IPIV, INFO)
       CALL ZGETRI(N-1, T1, LDA, IPIV, WORK, LWORK, INFO)
       CALL ZGEMM('N','N',N-1,N-1,N-1,1.0,T1,LDA,A,LDA,0.0,T4,LDA)
-      CALL ZGEEV('N','V',N-1, T4, LDA, eval, avec, LDAVEC, 
+      CALL ZGEEV('V','V',N-1, T4, LDA, eval, avec, LDAVEC, 
      &           evec, LDEVEC, WORK, LWORK, RWORK, INFO)
 #endif
 #endif
@@ -808,12 +808,11 @@ c     Must watch out, this routine isn't very robust.
           iloc = i
         end if
       end do
-           
+#ifdef ORR_CHECK_EIG 
       do j = 0, n-2
         eigenvector(j) = evec(j,ind(iloc))
       end do
-#ifdef ORR_CHECK_EIG 
-      residual = CHECKEIG (N-1,T4,lda,eigenvalue,eigenvector)
+      residual = CHECKEIG(N-1,T4,lda,eigenvalue,eigenvector)
       if (residual .gt. .01) then
         write (*,*) 'WARNING eigenvalue not converged!'
       end if
@@ -854,7 +853,8 @@ c
           end do
           open(11)
           do j = 0, N
-            write (11,60) eta(j), temp1(j), temp2(j)
+            write (11,60) eta(j), temp1(j), temp2(j), 
+     &           REAL(avec(j,ind(iloc))), AIMAG(avec(j,ind(iloc)))
           end do
           close(11)
           write (*,40)

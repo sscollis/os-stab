@@ -13,7 +13,7 @@ c
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=512)
+      parameter   (idim=1024)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -77,7 +77,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=512)
+      parameter   (idim=1024)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -157,7 +157,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=512)
+      parameter   (idim=1024)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -201,7 +201,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=512)
+      parameter   (idim=1024)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -224,10 +224,17 @@ c***********************************************************************
       real        D1hat(0:idim,0:idim), D2hat(0:idim,0:idim)  
                 
       LDD = idim
-      
+     
+      open(10) 
       do i = 0, n
         u(i) = (1.-eta(i)**2)
+        d1u(i) = -2.*eta(i)
+        d2u(i) = -2.0
+        write(10,20) eta(i), u(i), d1u(i), d2u(i)
+ 20     format (1x,4(es16.8e3,1x))
       end do
+      close(10)
+#if 0
 c
 c     Compute the collocation derivatives
 c
@@ -248,10 +255,10 @@ c     CALL WRRRN ('D1hat', N+1, N+1, D1hat, LDd+1, 0)
             d1u(i) = d1u(i) + D1hat(i,k)*u(k)
             d2u(i) = d2u(i) + D2hat(i,k)*u(k)
         end do
-c        write (*,10) eta(i), u(i), d1u(i), d2u(i)
-c  10    format (1x,4(e12.4,1x))
+c       write (*,10) eta(i), u(i), d1u(i), d2u(i)
+c  10   format (1x,4(e12.4,1x))
       end do
-
+#endif
       return
       end
 
@@ -265,7 +272,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=512)
+      parameter   (idim=1024)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -349,7 +356,7 @@ C
 c***********************************************************************
 c     Common variables
 c***********************************************************************
-      parameter   (idim=512)
+      parameter   (idim=1024)
       integer     n
       real        eta(0:idim), th(0:idim), lmap
       real        m1(0:idim), m2(0:idim), m3(0:idim), m4(0:idim)
@@ -557,7 +564,7 @@ C
 C     Check an eigenvalue and eigenvector
 C
 C***********************************************************************
-      PARAMETER (idim=512)
+      PARAMETER (idim=1024)
       
       integer    N
       complex    A(LDA,N), EVAL, EVEC(N)
@@ -586,7 +593,7 @@ C***********************************************************************
       INTEGER N
       REAL Y(0:N), DY(0:N)
 
-      PARAMETER (idim=512)
+      PARAMETER (idim=1024)
       REAL WORK(0:IDIM)
 
       IF (N.GT.IDIM) THEN
@@ -634,7 +641,7 @@ C     returned in real space in YI and Y is unscathed.
 C
 C***********************************************************************
       REAL Y(0:N), YI(0:N+1)
-      PARAMETER (idim=512)
+      PARAMETER (idim=1024)
       REAL WORK(0:IDIM)
       
       DO I = 0, N
@@ -681,6 +688,7 @@ c***********************************************************************
       call CHEBYSHEV (U,nmode,1)
       call CHEBYSHEV (V,nmode,1)
 
+      open(30)
       do i = 0, NBIG
         X = I*PI/NBIG
         IU = 0.0
@@ -689,10 +697,10 @@ c***********************************************************************
           IU = IU + U(M)*COS(FLOAT(M)*X)
           IV = IV + V(M)*COS(FLOAT(M)*X)
         END DO
-        write (10,10) cos(x),Iu,Iv
+        write (30,10) cos(x), Iu, Iv
       end do
-      close(10)
-  10  format (1x,3(e16.8,4x))
+      close(30)
+  10  format (1x,3(es16.8e3,1x))
 
       RETURN
       END
@@ -878,7 +886,7 @@ C
 C     Calculation the Chebyshev collocation derivative matrix
 C
 C**************************************************************************
-      PARAMETER (IDIM=512)
+      PARAMETER (IDIM=1024)
       REAL      D(0:LDD1,0:N), PI
       REAL      C(0:IDIM)
 

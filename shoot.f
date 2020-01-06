@@ -248,7 +248,7 @@ c
           t = to + h*k
           write (20,10) t,REAL(U(1,1,k)),AIMAG(U(1,1,k)),REAL(U(1,2,k)),
      &                    AIMAG(U(1,2,k)),REAL(v(1,k)),AIMAG(v(1,k))
- 10       format (1x,7(e12.4,1x))
+ 10       format (1x,7(ES16.8E3,1x))
         end do
 #endif
 c
@@ -320,7 +320,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
         end if
 
         write (*,30) icount, real(c), aimag(c), real(err), aimag(err)
-  30    format (1x,i4,2(e17.8,e17.8,3x))
+  30    format (1x,i4,2(1x,es16.8e3,1x,es16.8e3,3x))
 
         icount = icount + 1
       end do
@@ -328,10 +328,10 @@ c
 c.... Output Eigenvalue
 c      
       write (*,40) real(ctemp), aimag(ctemp), qend
-  40  format (/,'Eigenvalue = ',e17.8,1x,e17.8,2x,i5/)
+  40  format (/,'Eigenvalue = ',e17.8e3,1x,e17.8e3,2x,i5/)
       write (*,45) icount, abs(err), abs(c-cm1)
   45  format ('  Eigenvalue iterations = ', i5/,'  |error| = ',
-     &        es17.8/,'  |c-cm1| = ', es17.8/)
+     &        es17.8e3/,'  |c-cm1| = ', es17.8e3/)
 c
 c     Second Pass to compute the eigenfunctions
 c

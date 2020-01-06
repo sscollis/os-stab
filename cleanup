@@ -4,5 +4,5 @@
 #
 #   12/27/2019 
 #
-/bin/rm fort.* *.dat *.out *.q *.g
+/bin/rm -f fort.* *.dat *.out *.q *.g
 exit
