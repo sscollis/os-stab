@@ -117,7 +117,7 @@ c     read (*,*) Lmap
      .                  aimag(eigenvalue(i,j))
           write (*,60)  real(alpha),aimag(alpha),real(eigenvalue(i,j)),
      .                  aimag(eigenvalue(i,j))
-  60      format (1x,4(e17.10,4x))
+  60      format (1x,4(ES16.8E3,1x))
         end do
       end do
 
