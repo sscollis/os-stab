@@ -62,7 +62,7 @@ F77 = gfortran
 # Define all objects
 #
 ALL = bl conte contebl conteucbl orrncbl orrcolchan orrsom orrspace \
-			orrfdbl orrfdchan orrucbfs orrucbl orrwong shoot
+			orrfdbl orrfdchan orrbfs orrucbfs orrucbl orrwong shoot
 #
 OBJS = $(foreach module, $(ALL), $(module).o) $(NR_OBJ)
 #
@@ -97,6 +97,7 @@ all:
 	$(MAKE) orrspace
 	$(MAKE) orrfdbl
 	$(MAKE) orrfdchan
+	$(MAKE) orrbfs
 	$(MAKE) orrucbfs
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
@@ -122,26 +123,29 @@ orrsom: orrsom.o $(NR_OBJ)
 orrspace: orrspace.o $(NR_OBJ)
 	$(FC) $(LIB) orrspace.o -o orrspace
 
-orrncbl: orrncbl.o
-	$(FC) $(LIB) orrncbl.o -o orrncbl
+orrncbl: orrncbl.o nr.o
+	$(FC) $(LIB) nr.o orrncbl.o -o orrncbl
 
-orrcolchan: orrcolchan.o
-	$(FC) $(LIB) orrcolchan.o -o orrcolchan
+orrcolchan: orrcolchan.o nr.o
+	$(FC) $(LIB) nr.o orrcolchan.o -o orrcolchan
 
-orrfdbl: orrfdbl.o
-	$(FC) $(LIB) orrfdbl.o -o orrfdbl
+orrfdbl: orrfdbl.o nr.o
+	$(FC) $(LIB) nr.o orrfdbl.o -o orrfdbl
 
-orrfdchan: orrfdchan.o
-	$(FC) $(LIB) orrfdchan.o -o orrfdchan
+orrfdchan: orrfdchan.o nr.o
+	$(FC) $(LIB) nr.o orrfdchan.o -o orrfdchan
 
-orrucbfs: orrucbfs.o
-	$(FC) $(LIB) orrucbfs.o -o orrucbfs
+orrbfs: orrbfs.o nr.o
+	$(FC) $(LIB) nr.o orrbfs.o -o orrbfs
 
-orrucbl: orrucbl.o
-	$(FC) $(LIB) orrucbl.o -o orrucbl
+orrucbfs: orrucbfs.o nr.o
+	$(FC) $(LIB) nr.o orrucbfs.o -o orrucbfs
 
-orrwong: orrwong.o
-	$(FC) $(LIB) orrwong.o -o orrwong
+orrucbl: orrucbl.o nr.o
+	$(FC) $(LIB) nr.o orrucbl.o -o orrucbl
+
+orrwong: orrwong.o nr.o
+	$(FC) $(LIB) nr.o orrwong.o -o orrwong
 
 clean:
 	/bin/rm -fr $(ALL) *.o *.mod *.dSYM

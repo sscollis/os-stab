@@ -12,7 +12,7 @@ c     Author:   S. Scott Collis
 c
 c     Date:     3-14-92
 c
-c     Revision: 9-18-92
+c     Revision: 1-5-2020 
 c
 c***********************************************************************
 c     Common variables
@@ -50,9 +50,11 @@ c***********************************************************************
 c
 c     Setup IMSL workspace
 c
+#ifdef USE_IMSL
       REAL             RWKSP(10000)
       COMMON /WORKSP/  RWKSP
       call IWKIN(10000)
+#endif
 c
 c     User input
 c      
@@ -305,21 +307,6 @@ c
       end
 
 C***********************************************************************
-      FUNCTION RTNEWT(X1, X2, XACC)
-C***********************************************************************
-      PARAMETER (JMAX=20)
-      RTNEWT=0.5*(X1+X2)
-      DO J=1,JMAX
-        CALL FUNCD(RTNEWT,F,DF)
-        DX=F/DF
-        RTNEWT=RTNEWT-DX
-        IF((X1-RTNEWT)*(RTNEWT-X2).LT.0.0) PAUSE 'JUMPED OUT OF BOUNDS'
-        IF(ABS(DX).LT.XACC) RETURN
-      END DO
-      PAUSE 'RTNEWT exceeding maximum iterations'
-      END
-
-C***********************************************************************
       SUBROUTINE FUNCD(X,F,DF)
 C***********************************************************************
       REAL          X, ETA, GAMMA, ETAOUT
@@ -382,36 +369,36 @@ c***********************************************************************
       pi = ACOS(-1.0)
       LDD = idim
 
-      if (.true.) then
-	write (*,10)
+      if (.false.) then
+        write (*,10)
   10    format (/,1x,'Read Mean Profile',/)
         write (*,20)
   20    format (1x,'Enter filename ==> ',$)
-	read (*,'(a)') profile
-	open (unit=11,file=profile,status='unknown')
+        read (*,'(a)') profile
+        open (unit=11,file=profile,status='unknown')
   
-	i = 0
-	read (11,35) temp, nbl
+        i = 0
+        read (11,35) temp, nbl
   35    format (a1,i5)
-	nbl = nbl - 1
-	do i = 0, nbl
-	  read (11,*,end=100) ydat(i),Ut(i),junk
-	end do
-	close (11)
+        nbl = nbl - 1
+        do i = 0, nbl
+          read (11,*,end=100) ydat(i),Ut(i),junk
+        end do
+        close (11)
  100    continue
       else
         nbl = 100
-	do i = 0, nbl
-	  ydat(i) = -1.0+i*1.0/nbl
-	  Ut(i) = (1.0-ydat(i)**2)
-	end do
+        do i = 0, nbl
+          ydat(i) = -1.0+i*1.0/nbl
+          Ut(i) = (1.0-ydat(i)**2)
+        end do
       end if
 c
 c     Make a mirror image
 c
       do i = nbl-1, 0, -1
         ydat(2*nbl-i) = 2.*ydat(nbl)-ydat(i)
-	Ut(2*nbl-i) = Ut(i)
+        Ut(2*nbl-i) = Ut(i)
       end do
       nbl2 = 2*nbl
 c
@@ -438,7 +425,7 @@ c
      .     status='unknown')
       do i = 0, nbl2
         thtemp = i*dth
-	xi(i) = COS(thtemp)*Lmap2/2. + Lmap2/2. + ymin2
+        xi(i) = COS(thtemp)*Lmap2/2. + Lmap2/2. + ymin2
         call SPEVAL(nbl2+1,ydat,Ut,uspl,xi(i),us(i))
         write (9,40) xi(i), us(i), thtemp
       end do
@@ -474,19 +461,19 @@ c
       call MAKE_BL_METRICS
 
       do i = 0, n
-	xitemp = COS(th(i))*Lmap/2. + Lmap/2. + ymin
-	xitemp2 = (xitemp-(ymin2 + Lmap2/2.))*2./Lmap2
-	if (xitemp2 .ge. 1.) then
-	  xitemp2 = 1.0
-	else if (xitemp2 .le. -1.) then
-	  xitemp2 = -1.0
-	end if
+        xitemp = COS(th(i))*Lmap/2. + Lmap/2. + ymin
+        xitemp2 = (xitemp-(ymin2 + Lmap2/2.))*2./Lmap2
+        if (xitemp2 .ge. 1.) then
+          xitemp2 = 1.0
+        else if (xitemp2 .le. -1.) then
+          xitemp2 = -1.0
+        end if
         thtemp = ACOS( xitemp2 )
-	call CHEBYINTF(nbl2,u(i),thtemp,us)
-	call CHEBYINTF(nbl2,d1u(i),thtemp,d1us)
-	call CHEBYINTF(nbl2,d2u(i),thtemp,d2us)
+        call CHEBYINTF(nbl2,u(i),thtemp,us)
+        call CHEBYINTF(nbl2,d1u(i),thtemp,d1us)
+        call CHEBYINTF(nbl2,d2u(i),thtemp,d2us)
         d1u(i) = d1u(i)*Lmap/Lmap2
-	d2u(i) = d2u(i)*(Lmap/Lmap2)**2
+        d2u(i) = d2u(i)*(Lmap/Lmap2)**2
       end do
 c
 c     Compute the collocation derivatives
@@ -513,7 +500,7 @@ c      end do
       open(unit=10,file=filename(1:ilen)//'.vel',form='formatted',
      .     status='unknown')
       do i = 0, n
-	xitemp = eta(i)*Lmap/2. + Lmap/2. + ymin
+        xitemp = eta(i)*Lmap/2. + Lmap/2. + ymin
         write (10,12) xitemp,u(i),d1u(i)*2./Lmap,d2u(i)*(2./Lmap)**2
       end do 
   12  format (1x,4(e16.8,4x))
@@ -673,6 +660,7 @@ c     Make the derivative (wrt alpha) matrices
 
       return
       end
+
 C***********************************************************************
       function CHECKEIG(N,A,LDA,EVAL,EVEC)
 C***********************************************************************
@@ -684,8 +672,11 @@ C***********************************************************************
       complex    A(LDA,N), EVAL, EVEC(N)
       complex    X(N), Y(N)
       real       CHECKEIG
-      
+#if USE_IMSL      
       CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
+#else
+      write(*,*) "Need to implement LAPACK"
+#endif
       CHECKEIG = 0.0
       DO I = 1, N
         CHECKEIG = CHECKEIG + ABS(X(I)-EVAL*EVEC(I))
@@ -694,6 +685,7 @@ C***********************************************************************
       
       RETURN
       END
+
 C***********************************************************************
       subroutine HTRAN(N,A,B,LD)
 C***********************************************************************
@@ -712,6 +704,7 @@ C***********************************************************************
 
       RETURN
       END
+
 C***********************************************************************
       subroutine CXDOTY (N,X,Y,C)
 C***********************************************************************
@@ -722,13 +715,14 @@ C***********************************************************************
       integer    N
       complex    X(N), Y(N), C
       
-      C = CMPLX (0.0,0.0)
+      C = CMPLX(0.0,0.0)
       do I = 1, N
         C = C + CONJG(X(I))*Y(I)
       end do
 
       RETURN
       END
+
 C***********************************************************************
 C               S O L V E   O R R   S O M M E R F E L D 
 C***********************************************************************
@@ -813,6 +807,7 @@ c
 c     But the top and bottom rows are trivial so that they can be
 c     removed
 c
+#ifdef USE_IMSL
       CALL LINCG (N-1, B, LDA, T1, LDA)
       CALL MCRCR (N-1, N-1, T1, LDA, N-1, N-1, A, LDA,
      .            N-1, N-1, T4, LDA)
@@ -824,7 +819,9 @@ C
      .            N-1, N-1, T3, LDA)
       call HTRAN (N-1, T3, T2, LDA)
       call EVCCG (N-1, T2, LDA, aeval, aevec, ldevec)
-      
+#else
+      write(*,*) "Need to implement LAPACK/BLAS"
+#endif      
       do i = 0, N-2 
         temp1(i) = REAL(eval(i))
         temp2(i) = AIMAG(eval(i))
@@ -842,7 +839,9 @@ c     Must watch out, this routine isn't very robust.
       end do
       
       eigenvalue = cmplx(temp1(n-2),temp2(n-2))
+      
       iloc = n-2
+
 c      first = .true.
 c      if ( real(oldeig) .le. -999.) then
 c        eigenvalue = cmplx(temp1(n-2),temp2(n-2))
@@ -882,10 +881,14 @@ c     Compute dw/da
            T1(i,j) = dB(i,j)*eigenvalue-dA(i,j)
          end do
        end do
+#ifdef USE_IMSL
        call MUCRV  (N-1, N-1, T1, LDA, N-1, tvec, 1, N-1, temp1)
        call CXDOTY (N-1, tavec, temp1, dw)
        call MUCRV  (N-1, N-1, B, LDA, N-1, tvec, 1, N-1, temp1)
        call CXDOTY (N-1, tavec, temp1, dalp)
+#else
+       write(*,*) "Need to implement LAPACK/BLAS"
+#endif
        dwda = -dw/dalp
        dalpha = -AIMAG(eigenvalue)/AIMAG(dwda)
        nalpha = alpha + dalpha
@@ -913,7 +916,7 @@ c     .                  index(i)
         end do
         write (*,40)
         read (*,*) which
-	do while (which .ne. -1)
+        do while (which .ne. -1)
           temp1(0) = 0.0
           temp2(0) = 0.0
           temp1(n) = 0.0
@@ -981,17 +984,17 @@ c***********************************************************************
 
       OPEN (UNIT=20,FILE='eigfun.dat',FORM='FORMATTED',STATUS='UNKNOWN')
       DO J = 0, NBIG
-	Y(J) = J*PI/NBIG
-	X(J) = J*2.*PI/NBIG
-	TR = 0.0
-	TI = 0.0
-	DO M = 0, NMODE
-	  TR = TR + EIGR(M)*COS(FLOAT(M)*Y(J))
-	  TI = TI + EIGI(M)*COS(FLOAT(M)*Y(J))
-	END DO
-	T(J) = CMPLX(TR,TI)
-	XI = COS(Y(J))*LMAP/2.+LMAP/2.+YMIN
-	WRITE (20,10) XI, TR, TI
+        Y(J) = J*PI/NBIG
+        X(J) = J*2.*PI/NBIG
+        TR = 0.0
+        TI = 0.0
+        DO M = 0, NMODE
+          TR = TR + EIGR(M)*COS(FLOAT(M)*Y(J))
+          TI = TI + EIGI(M)*COS(FLOAT(M)*Y(J))
+        END DO
+        T(J) = CMPLX(TR,TI)
+        XI = COS(Y(J))*LMAP/2.+LMAP/2.+YMIN
+        WRITE (20,10) XI, TR, TI
       END DO
       CLOSE (20)
 C
@@ -1003,24 +1006,24 @@ C
         DO K = 0, NBIG
             DT(I) = DT(I) + D1(I,K)*T(K)
         END DO
-	DT(I) = DT(I)*2./LMAP
+        DT(I) = DT(I)*2./LMAP
       END DO
 
       OPEN (UNIT=21,FILE='eigvel.dat',FORM='FORMATTED',STATUS='UNKNOWN')
       TIME = 0.0
       DO I = 0, NBIG
         DO J = 0, NBIG
-	  U(I,J) = REAL(DT(J)*CEXP((0.,1.)*ALPHA*(X(I)-C*TIME)))
-	  V(I,J) = REAL((0.,-1.)*ALPHA*T(J)*
+          U(I,J) = REAL(DT(J)*CEXP((0.,1.)*ALPHA*(X(I)-C*TIME)))
+          V(I,J) = REAL((0.,-1.)*ALPHA*T(J)*
      .                  CEXP((0.,1.)*ALPHA*(X(I)-C*TIME)))
           PSIR(I,J) = REAL(T(J)*CEXP((0.,1.)*ALPHA*(X(I)-C*TIME)))
           PSII(I,J) = AIMAG(T(J)*CEXP((0.,1.)*ALPHA*(X(I)-C*TIME)))
           IF (I.EQ.0) THEN
-	    XI = COS(Y(J))*LMAP/2.+LMAP/2.+YMIN
-	    WRITE (21,20) XI, U(I,J), V(I,J), REAL(DT(J)),
+            XI = COS(Y(J))*LMAP/2.+LMAP/2.+YMIN
+            WRITE (21,20) XI, U(I,J), V(I,J), REAL(DT(J)),
      .                    AIMAG(DT(J)), REAL(T(J)), AIMAG(T(J))
-	  END IF
-	END DO
+          END IF
+        END DO
       END DO
       CLOSE (21)
 C
@@ -1038,37 +1041,11 @@ C
      .            ((   U(i,j), i=1,NBIG), j=1,NBIG),
      .            ((   V(i,j), i=1,NBIG), j=1,NBIG),
      .            ((PSII(i,j), i=1,NBIG), j=1,NBIG)
-	  
+          
 
   10  format (1x,3(e16.8,4x))
   20  format (1x,7(e16.8,4x))
 
-      RETURN
-      END
-
-C*************************************************************************
-      SUBROUTINE PIKSR2 (N, ARR, BRR)
-C*************************************************************************
-C
-C     Try the simple insertion sort.
-C
-C*************************************************************************
-      REAL ARR(N), A
-      INTEGER BRR(N), B
-      
-      DO J = 2, N
-        A = ARR(J)
-        B = BRR(J)
-        DO I = J-1,1,-1
-          IF(ARR(I).LE.A) GOTO 10
-          ARR(I+1)=ARR(I)
-          BRR(I+1)=BRR(I)
-        END DO
-        I = 0
-  10    ARR(I+1)=A
-        BRR(I+1)=B
-      END DO
-      
       RETURN
       END
 
@@ -1408,6 +1385,7 @@ C*************************************************************************
 
       RETURN
       END
+
 C*************************************************************************
 C
 C     These routines are for READ_BL only!
@@ -1509,6 +1487,7 @@ C*************************************************************************
       
       RETURN
       END
+
 C***********************************************************************
       SUBROUTINE SPLINE (N,X,Y,FDP)      
 C***********************************************************************
@@ -1558,6 +1537,7 @@ C-----WE NOW HAVE THE DESIRED DERIVATIVES SO WE RETURN TO THE
 C-----MAIN PROGRAM.  
       RETURN         
       END  
+
 C***********************************************************************
       SUBROUTINE SPEVAL (N,X,Y,FDP,XX,F) 
 C***********************************************************************
@@ -1583,5 +1563,3 @@ C-----NOW EVALUATE THE CUBIC
      2   +Y(I)*DXP/DEL + Y(I+1)*DXM/DEL 
       RETURN        
       END 
-      
-     

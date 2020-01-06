@@ -272,20 +272,6 @@ c
 
       return
       end
-C***********************************************************************
-      FUNCTION RTNEWT(X1, X2, XACC)
-C***********************************************************************
-      PARAMETER (JMAX=20)
-      RTNEWT=0.5*(X1+X2)
-      DO J=1,JMAX
-        CALL FUNCD(RTNEWT,F,DF)
-        DX=F/DF
-        RTNEWT=RTNEWT-DX
-        IF((X1-RTNEWT)*(RTNEWT-X2).LT.0.0) PAUSE 'JUMPED OUT OF BOUNDS'
-        IF(ABS(DX).LT.XACC) RETURN
-      END DO
-      PAUSE 'RTNEWT exceeding maximum iterations'
-      END
 
 C***********************************************************************
       SUBROUTINE FUNCD(X,F,DF)
@@ -375,7 +361,7 @@ c
       do while (y/sqrt(2.) .le. xout)
         u(i) = 0.0
         X = Y/SQRT(2.)
-        xi = RTNEWT (-2.,2.2,1e-12)
+        xi = RTNEWT(-2.,2.2,1e-12,FUNCD)
         do m = 0, nmode
           u(i) = u(i)+utemp(m)*COS(float(m)*ACOS(xi))
         end do
@@ -723,54 +709,7 @@ c     Must watch out, this routine isn't very robust.
      
       return
       end
-C**************************************************************************
-      SUBROUTINE SORT(N, RA, RB)
-C**************************************************************************
-C
-C     Sort vector RA and carry RB along for the ride.  This routine 
-C     uses the efficient Heapsort.
-C
-C***********************************************************************
-      REAL RA(N), RB(N)
-      L=N/2+1
-      IR=N
-  10  CONTINUE
-        IF(L.GT.1)THEN
-          L=L-1
-          RRA=RA(L)
-          RRB=RB(L)
-        ELSE
-          RRA=RA(IR)
-          RRB=RB(IR)
-          RA(IR)=RA(1)
-          RB(IR)=RB(1)
-          IR=IR-1
-          IF(IR.EQ.1)THEN
-            RA(1)=RRA
-            RB(1)=RRB
-            RETURN
-          END IF
-        END IF
-        I=L
-        J=L+1
- 20     IF(J.LE.IR)THEN
-          IF(J.LT.IR)THEN
-            IF(RA(J).LT.RA(J+1)) J=J+1
-          END IF
-          IF(RRA.LT.RA(J))THEN
-            RA(I)=RA(J)
-            RB(I)=RB(J)
-            I=J
-            J=J+J
-          ELSE
-            J=IR+1
-          ENDIF
-        GOTO 20
-        ENDIF
-        RA(I)=RRA
-        RB(I)=RRB
-      GOTO 10
-      END
+
 C***********************************************************************
       SUBROUTINE DCHEBYSHEV(N, Y, DY)
 C***********************************************************************

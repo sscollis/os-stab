@@ -306,21 +306,6 @@ c
       end
 
 C***********************************************************************
-      FUNCTION RTNEWT(X1, X2, XACC)
-C***********************************************************************
-      PARAMETER (JMAX=20)
-      RTNEWT=0.5*(X1+X2)
-      DO J=1,JMAX
-        CALL FUNCD(RTNEWT,F,DF)
-        DX=F/DF
-        RTNEWT=RTNEWT-DX
-        IF((X1-RTNEWT)*(RTNEWT-X2).LT.0.0) PAUSE 'JUMPED OUT OF BOUNDS'
-        IF(ABS(DX).LT.XACC) RETURN
-      END DO
-      PAUSE 'RTNEWT exceeding maximum iterations'
-      END
-
-C***********************************************************************
       SUBROUTINE FUNCD(X,F,DF)
 C***********************************************************************
       REAL          X, ETA, GAMMA, ETAOUT
@@ -1088,32 +1073,6 @@ C
   10  format (1x,3(e16.8,4x))
   20  format (1x,7(e16.8,4x))
 
-      RETURN
-      END
-
-C*************************************************************************
-      SUBROUTINE PIKSR2 (N, ARR, BRR)
-C*************************************************************************
-C
-C     Try the simple insertion sort.
-C
-C*************************************************************************
-      REAL ARR(N), A
-      INTEGER BRR(N), B
-      
-      DO J = 2, N
-        A = ARR(J)
-        B = BRR(J)
-        DO I = J-1,1,-1
-          IF(ARR(I).LE.A) GOTO 10
-          ARR(I+1)=ARR(I)
-          BRR(I+1)=BRR(I)
-        END DO
-        I = 0
-  10    ARR(I+1)=A
-        BRR(I+1)=B
-      END DO
-      
       RETURN
       END
 
