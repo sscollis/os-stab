@@ -675,7 +675,7 @@ C***********************************************************************
 #if USE_IMSL      
       CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
 #else
-      write(*,*) "Need to implement LAPACK"
+      CALL ZGEMV ('N', N, N, 1.0, A, LDA, EVEC, 1, 0.0, X, 1)
 #endif
       CHECKEIG = 0.0
       DO I = 1, N

@@ -228,7 +228,10 @@ c***********************************************************************
       
       do i = 0, n
         u(i) = (1.-eta(i)**2)
+        d1u(i) = -2.0*eta(i)
+        d2u(i) = -2.0
       end do
+#ifdef USE_FD_DERIVATIVES
 c
 c     Compute the finite difference derivatives
 c
@@ -249,7 +252,7 @@ c
             d2u(i) = d2u(i) + D2hat(i,k)*u(k)
         end do
       end do
-
+#endif
       open(10)
       do i = 0, n
         write (10,10) eta(i), u(i), d1u(i), d2u(i)
@@ -527,11 +530,15 @@ c
         d1u(j) = 0.0
         d2u(j) = 0.0
       end do
-
+c
+c     Write out mean profile
+c
+      open(10)
       do i = 0, n
-        write (*,10) eta(i), u(i), d1u(i), d2u(i)
+        write (10,10) eta(i), u(i), d1u(i), d2u(i)
       end do 
- 10   format (1x,4(e16.8,4x))
+ 10   format (1x,4(ES16.8E3,1x))
+      close(10)
  
       return
       end

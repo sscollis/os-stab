@@ -698,8 +698,11 @@ C***********************************************************************
       complex    A(LDA,N), EVAL, EVEC(N)
       complex    X(N), Y(N)
       real       CHECKEIG
-      
-c     CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
+#ifdef USE_ISML      
+      CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
+#else
+      CALL ZGEMV ('N', N, N, 1.0, A, LDA, EVEC, 1, 0.0, X, 1)
+#endif
       CHECKEIG = 0.0
       DO I = 1, N
         CHECKEIG = CHECKEIG + ABS(X(I)-EVAL*EVEC(I))
@@ -916,57 +919,56 @@ c     Must watch out, this routine isn't very robust.
 c
 c     Check the adjoint eigenvector (it checks)
 c
-c      do i = 0, n-2
-c        ctemp(i) = 0.0
-c        do j = 0, n-2
-c          ctemp(i) = ctemp(i) + conjg(tavec(j))*T4(j,i)
-c        end do
-c        write (*,*) ctemp(i)-conjg(tavec(i))*eigenvalue
-c      end do
-c      do i = 0, n-2
-c        do j = 0, n-2
-c          T1(i,j) = B(i,j)*eigenvalue-A(i,j)
-c        end do
-c      end do
-c      residual = 0.0
-c      do i = 0, n-2
-c        ctemp(i) = 0.0
-c        do j = 0, n-2
-c          ctemp(i) = ctemp(i) + conjg(tavec(j))*t1(j,i)
-c        end do
-c        residual = residual + abs(ctemp(i))
-c      end do
-c      write (*,*) residual
-    
-c      residual = CHECKEIG (N-1,T4,lda,eigenvalue,tvec)
-c      if (residual .gt. .01) then
-c        write (*,*) 'WARNING eigenvalue not converged!'
-c      end if
-c      residual = CHECKEIG (N-1,T2,lda,prod,tavec)
-c      if (residual .gt. .01) then
-c        write (*,*) 'WARNING eigenvalue not converged!'
-c      end if
-      
+#ifdef CHECK_EIGENVECTOR
+      do i = 0, n-2
+        ctemp(i) = 0.0
+        do j = 0, n-2
+          ctemp(i) = ctemp(i) + conjg(tavec(j))*T4(j,i)
+        end do
+        write (*,*) ctemp(i)-conjg(tavec(i))*eigenvalue
+      end do
+      do i = 0, n-2
+        do j = 0, n-2
+          T1(i,j) = B(i,j)*eigenvalue-A(i,j)
+        end do
+      end do
+      residual = 0.0
+      do i = 0, n-2
+        ctemp(i) = 0.0
+        do j = 0, n-2
+          ctemp(i) = ctemp(i) + conjg(tavec(j))*t1(j,i)
+        end do
+        residual = residual + abs(ctemp(i))
+      end do
+      write (*,*) residual
+      residual = CHECKEIG (N-1,T4,lda,eigenvalue,tvec)
+      if (residual .gt. .01) then
+        write (*,*) 'WARNING eigenvalue not converged!'
+      end if
+      residual = CHECKEIG (N-1,T2,lda,prod,tavec)
+      if (residual .gt. .01) then
+        write (*,*) 'WARNING eigenvalue not converged!'
+      end if
+#endif
+c     
 c     Compute dw/da
-
+c
       do i = 0, n-2
         do j = 0, n-2
           T1(i,j) = dB(i,j)*eigenvalue-dA(i,j)
         end do
       end do
-
-c      call MUCRV  (N-1, N-1, T1, LDA, N-1, tvec, 1, N-1, ctemp)
-c      call CXDOTY (N-1, tavec, ctemp, dw)
-c      call MUCRV  (N-1, N-1, B, LDA, N-1, tvec, 1, N-1, ctemp)
-c      call CXDOTY (N-1, tavec, ctemp, dalp)
-
-c     replace with LAPack
-
+#ifdef USE_ISML
+      call MUCRV  (N-1, N-1, T1, LDA, N-1, tvec, 1, N-1, ctemp)
+      call CXDOTY (N-1, tavec, ctemp, dw)
+      call MUCRV  (N-1, N-1, B, LDA, N-1, tvec, 1, N-1, ctemp)
+      call CXDOTY (N-1, tavec, ctemp, dalp)
+#else
       call ZGEMV( 'N', N-1, N-1, 1.0, T1, LDA, tvec, 1, 0.0, ctemp, 1)
       dw = zdotc( N-1, tavec, 1, ctemp, 1)
       call ZGEMV( 'N', N-1, N-1, 1.0, B, LDA, tvec, 1, 0.0, ctemp, 1)
       dalp = zdotc( N-1, tavec, 1, ctemp, 1)
-      
+#endif
       dwda = -1.0*(dw/dalp)
       dalpha = -IMAG(eigenvalue)/IMAG(dwda)
       nalpha = alpha + sfac*dalpha

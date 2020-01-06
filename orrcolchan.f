@@ -570,8 +570,11 @@ C***********************************************************************
       complex    A(LDA,N), EVAL, EVEC(N)
       complex    X(idim), Y(idim)
       real       CHECKEIG
-      
-c      CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
+#ifdef USE_ISML      
+      CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
+#else
+      CALL ZGEMV ('N', N, N, 1.0, A, LDA, EVEC, 1, 0.0, X, 1)
+#endif
       CHECKEIG = 0.0
       DO I = 1, N
         CHECKEIG = CHECKEIG + ABS(X(I)-EVAL*EVEC(I))
@@ -580,6 +583,7 @@ c      CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
       
       RETURN
       END
+
 C***********************************************************************
       SUBROUTINE DCHEBYSHEV(N, Y, DY)
 C***********************************************************************
