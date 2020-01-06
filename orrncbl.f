@@ -698,7 +698,7 @@ C***********************************************************************
       complex    A(LDA,N), EVAL, EVEC(N)
       complex    X(N), Y(N)
       real       CHECKEIG
-#ifdef USE_ISML      
+#ifdef USE_IMSL
       CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
 #else
       CALL ZGEMV ('N', N, N, 1.0, A, LDA, EVEC, 1, 0.0, X, 1)
@@ -958,7 +958,7 @@ c
           T1(i,j) = dB(i,j)*eigenvalue-dA(i,j)
         end do
       end do
-#ifdef USE_ISML
+#ifdef USE_IMSL
       call MUCRV  (N-1, N-1, T1, LDA, N-1, tvec, 1, N-1, ctemp)
       call CXDOTY (N-1, tavec, ctemp, dw)
       call MUCRV  (N-1, N-1, B, LDA, N-1, tvec, 1, N-1, ctemp)

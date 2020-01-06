@@ -982,7 +982,7 @@ c     But the top and bottom rows are trivial so that they can be
 c     removed
 c
 #ifdef USE_IMSL
-      write(*,*) "Solving Eigenvalue Problem with ISML interface"
+      write(*,*) "Solving Eigenvalue Problem with IMSL interface"
       CALL LINCG (N-1, B, LDA, T1, LDA)
       CALL MCRCR (N-1, N-1, T1, LDA, N-1, N-1, A, LDA,
      .            N-1, N-1, T4, LDA)

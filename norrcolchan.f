@@ -467,7 +467,7 @@ C***********************************************************************
       complex    A(LDA,N), EVAL, EVEC(N)
       complex    X(idim)
       real       CHECKEIG
-#ifdef USE_ISML
+#ifdef USE_IMSL
       CALL MUCRV (N, N, A, LDA, N, EVEC, 1, N, X)
 #else
       CALL ZGEMV ('N', N, N, 1.0, A, LDA, EVEC, 1, 0.0, X, 1)
