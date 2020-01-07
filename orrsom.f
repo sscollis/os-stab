@@ -34,7 +34,8 @@ c***********************************************************************
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
-      parameter    (neq=4, inunit=20)
+      parameter    (neq=4)
+      integer       inunit
       complex       bc1(neq), bc2(neq), omega
       real          testalpha
       integer       north, nstep
@@ -42,13 +43,19 @@ c***********************************************************************
       character*1   input
       character*20  infile
       character*80  string
+
+      inunit = 20
       
       write (*,10)
   10  format (/,10x,'Solve Orr-Sommerfeld (Shooting)',/)
+#ifdef USE_FILE_INPUT
       write (*,60)
   60  format (/,1x,'Enter filename ==> ',$)
       read (*,'(a)') infile
       open (unit=inunit, file=infile, form='formatted')
+#else
+      inunit = 5
+#endif
       string(1:1) = '#'
       do while (string(1:1) .eq. '#')
         read(inunit,'(a)',err=99) string
@@ -107,6 +114,9 @@ c
 c     Fix to make my nondimensionalization match Mack's
 c
 #ifdef USE_MACK_NORMALIZATION
+c
+c     SSC: 1/7/2020 Why using the 1.7207877 ?
+c
       Re = Re*SQRT(2.)/1.7207877
       alpha = alpha*SQRT(2.)/1.7207877
 #else
