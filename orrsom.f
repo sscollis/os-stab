@@ -30,7 +30,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -185,7 +185,7 @@ c
       icount = 1
       err = 1.
       do while ((abs(err) .ge. 1.0e-8) .and. (icount .le. 20) .and.
-     .          (abs(c-cm1) .ge. 1.0e-12) )
+     &          (abs(c-cm1) .ge. 1.0e-12) )
         q = 0
         tq(0) = tf
 c
@@ -251,7 +251,7 @@ c
               Utemp(i) = U(i,m,k-1)
             end do
             call ODEINT(Utemp,n,t+h,t,1.E-5,-h/2.,1.e-20,nok,nbad,
-     .                  FHOMO,RKQC)
+     &                  FHOMO,RKQC)
 c           write (*,*) k, nok, nbad
             do i = 1, n
               U(i,m,k) = Utemp(i)
@@ -278,8 +278,8 @@ c
 c               write (*,*) k, mi, mj, test
 c		                
 c               test = ACOS( ABS ( inprod(n, U(1,mi,k), U(1,mj,k)) / 
-c      .               SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
-c      .                     inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
+c      &               SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
+c      &                     inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
 c     
 c               test = cc/SQRT(aa*bb)
 c               if (test .gt. testalpha) norm = .true.
@@ -331,7 +331,7 @@ c
                   P(j,i,q) = 0.0
                   do s = i, j-1
                     P(j,i,q) = P(j,i,q)-inprod(n,U(1,j,k),z(1,s))/w(j)*
-     .              P(s,i,q)
+     &              P(s,i,q)
                   end do
                 end if
               end do
@@ -413,7 +413,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           Bt = (2.*qt+1.)*err-(1.+qt)**2*errm1+qt**2*errm2
           Ct = (1.+qt)*err
           if ( ABS(Bt+SQRT(Bt**2-4.*At*Ct)) .gt. 
-     .         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
+     &         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
             c = ctemp-(ctemp-cm1)*2.*Ct/(Bt+SQRT(Bt**2-4.*At*Ct))
           else
             c = ctemp-(ctemp-cm1)*2.*Ct/(Bt-SQRT(Bt**2-4.*At*Ct))
@@ -424,7 +424,7 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
           errm1 = err
         end if
         write (*,30) icount,real(ctemp),aimag(ctemp),real(err),
-     .               aimag(err)
+     &               aimag(err)
   30    format (1x,i4,2(e17.8,e17.8,3x))
 
         icount = icount + 1
@@ -598,7 +598,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -618,8 +618,8 @@ c
         yf(j) = yo(j+1)
       end do
       yf(neq) = (1./alpha/Re*(2.*alpha**2*yo(3)-alpha**4*yo(1)) + 
-     .          (0.,1.)*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)))*alpha*Re 
+     &          (0.,1.)*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &          d2UU*yo(1)))*alpha*Re 
 
       return
       end
@@ -640,7 +640,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -660,8 +660,8 @@ c
       yf(j) = yo(j+1)
       end do
       yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)) 
+     &          (0.,1.)*alpha*Re*((UU-c)*(yo(3)-alpha**2*yo(1))-
+     &          d2UU*yo(1)) 
 
       return
       end
@@ -683,7 +683,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
@@ -733,7 +733,7 @@ c
         else
           xi3temp = xi(3,0)
           xi(3,0) = xi(3,0)+((xi3old-xi(3,0))/(xi2old-xi(2,n)))*
-     .              (1.0 - xi(2,n))
+     &              (1.0 - xi(2,n))
           xi3old = xi3temp
         end if
         p = p + 1
@@ -801,7 +801,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       common      /eig/   c, alpha, Re
 c***********************************************************************
