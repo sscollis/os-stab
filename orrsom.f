@@ -106,8 +106,13 @@ c
 c
 c     Fix to make my nondimensionalization match Mack's
 c
+#ifdef USE_MACK_NORMALIZATION
       Re = Re*SQRT(2.)/1.7207877
       alpha = alpha*SQRT(2.)/1.7207877
+#else
+      Re = Re*SQRT(2.)
+      alpha = alpha*SQRT(2.)
+#endif
       ymin = ymin
       ymax = ymax
       
@@ -265,14 +270,20 @@ c
                 aa = ABS(inprod(n, U(1,mi,k), U(1,mi,k)))
                 bb = ABS(inprod(n, U(1,mj,k), U(1,mj,k)))
                 cc = ABS(inprod(n, U(1,mi,k), U(1,mj,k)))
-                test = cc/SQRT(aa*bb)
+#ifdef USE_ANALYTIC_INPROD
+                test = 180.0*ACOS(MIN(1.0,ABS(cc)/SQRT(aa*bb)))/pi
+#else
+                test = 180.0*ACOS(ABS(cc)/SQRT(aa*bb))/pi
+#endif
 c               write (*,*) k, mi, mj, test
 c		                
 c               test = ACOS( ABS ( inprod(n, U(1,mi,k), U(1,mj,k)) / 
 c      .               SQRT( inprod(n, U(1,mi,k), U(1,mi,k))*
 c      .                     inprod(n, U(1,mj,k), U(1,mj,k)) ) ) )
 c     
-                if (test .gt. testalpha) norm = .true.
+c               test = cc/SQRT(aa*bb)
+c               if (test .gt. testalpha) norm = .true.
+                if (test .le. testalpha) norm = .true.
               end if
             end do
           end do
@@ -423,12 +434,19 @@ c         c = CMPLX( REAL(c), AIMAG(c)*.9999 )
   40  format (/,'Eigenvalue = ',e17.8,1x,e17.8,2x,i5/)
 
 c
-c       Second Pass
+c     Second Pass
 c
 
       if (eigfun) then
         write(*,*) 'Second pass'
         max = 0.0
+        k = nstep
+        do i = 1, n
+          y(i,k) = v(i,k)
+          do m = 1, n-r
+            y(i,k) = y(i,k) + U(i,m,k)*B(m,q)
+          end do
+        end do
         do m = 1, n-r
           B(m,q-1) = 0.0
           do j = 1, n-r
@@ -462,7 +480,7 @@ c
           write (12,20) t, REAL(y(2,k)/max),AIMAG(y(2,k)/max)
           write (13,20) t, REAL(y(3,k)/max),AIMAG(y(3,k)/max)
           write (14,20) t, REAL(y(4,k)/max),AIMAG(y(4,k)/max)
-	  write (15,20) t, REAL(y(2,k)/max),REAL((0.,-1.)*ALPHA*y(1,k)/max)
+          write (15,20) t, REAL(y(2,k)/max),REAL((0.,-1.)*ALPHA*y(1,k)/max)
   20      format ( 1x, 3(e17.8,2x) )
         end do
       end if
@@ -483,12 +501,13 @@ c***********************************************************************
  
       INPROD = 0.0
       do i = 1, n
-c       INPROD = INPROD + v1(i)*conjg(v2(i))
-        INPROD = INPROD + v1(i)*v2(i)
+        INPROD = INPROD + v1(i)*conjg(v2(i))
+c       INPROD = INPROD + v1(i)*v2(i)
       end do
       
       return
       end
+
 C***********************************************************************
       subroutine SRK4(neq, yo, yf, to, h, FUNC)
 C***********************************************************************
