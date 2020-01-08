@@ -91,16 +91,18 @@ all:
 	$(MAKE) conte 
 	$(MAKE) contebl 
 	$(MAKE) conteucbl
-	$(MAKE) orrncbl
-	$(MAKE) orrcolchan
 	$(MAKE) orrsom
 	$(MAKE) orrspace
+ifdef USE_NR
+	$(MAKE) orrncbl
+	$(MAKE) orrcolchan
 	$(MAKE) orrfdbl
 	$(MAKE) orrfdchan
 	$(MAKE) orrbfs
 	$(MAKE) orrucbfs
 	$(MAKE) orrucbl
 	$(MAKE) orrwong
+endif
 
 docs:
 	doxygen
@@ -123,29 +125,29 @@ orrsom: orrsom.o $(NR_OBJ)
 orrspace: orrspace.o $(NR_OBJ)
 	$(FC) $(LIB) orrspace.o -o orrspace
 
-orrncbl: orrncbl.o nr.o
-	$(FC) $(LIB) nr.o orrncbl.o -o orrncbl
+orrncbl: orrncbl.o $(NR_OBJ)
+	$(FC) $(LIB) orrncbl.o -o orrncbl
 
-orrcolchan: orrcolchan.o nr.o
-	$(FC) $(LIB) nr.o orrcolchan.o -o orrcolchan
+orrcolchan: orrcolchan.o $(NR_OBJ)
+	$(FC) $(LIB) orrcolchan.o -o orrcolchan
 
-orrfdbl: orrfdbl.o nr.o
-	$(FC) $(LIB) nr.o orrfdbl.o -o orrfdbl
+orrfdbl: orrfdbl.o $(NR_OBJ)
+	$(FC) $(LIB) orrfdbl.o -o orrfdbl
 
-orrfdchan: orrfdchan.o nr.o
-	$(FC) $(LIB) nr.o orrfdchan.o -o orrfdchan
+orrfdchan: orrfdchan.o $(NR_OBJ)
+	$(FC) $(LIB) orrfdchan.o -o orrfdchan
 
-orrbfs: orrbfs.o nr.o
-	$(FC) $(LIB) nr.o orrbfs.o -o orrbfs
+orrbfs: orrbfs.o $(NR_OBJ)
+	$(FC) $(LIB) orrbfs.o -o orrbfs
 
-orrucbfs: orrucbfs.o nr.o
-	$(FC) $(LIB) nr.o orrucbfs.o -o orrucbfs
+orrucbfs: orrucbfs.o $(NR_OBJ)
+	$(FC) $(LIB) orrucbfs.o -o orrucbfs
 
-orrucbl: orrucbl.o nr.o
-	$(FC) $(LIB) nr.o orrucbl.o -o orrucbl
+orrucbl: orrucbl.o $(NR_OBJ)
+	$(FC) $(LIB) orrucbl.o -o orrucbl
 
-orrwong: orrwong.o nr.o
-	$(FC) $(LIB) nr.o orrwong.o -o orrwong
+orrwong: orrwong.o $(NR_OBJ)
+	$(FC) $(LIB) orrwong.o -o orrwong
 
 clean:
 	/bin/rm -fr $(ALL) *.o *.mod *.dSYM
