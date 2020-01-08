@@ -400,7 +400,7 @@ c
 c         olderr = err
 c         err = U(1,1,nstep)*B(1,qend) + U(1,2,nstep)*B(2,qend)
         end if
-	
+
         ctemp = c
         if (icount .eq. 1) then
           cm2 = c
@@ -448,7 +448,8 @@ c     Second Pass
 c
 
       if (eigfun) then
-        write(*,*) 'Second pass'
+        write(*,50) 
+  50    format('Second pass: computing and writing eigenfunction')
         max = 0.0
         k = nstep
         do i = 1, n
@@ -491,7 +492,7 @@ c
           write (13,20) t, REAL(y(3,k)/max),AIMAG(y(3,k)/max)
           write (14,20) t, REAL(y(4,k)/max),AIMAG(y(4,k)/max)
           write (15,20) t, REAL(y(2,k)/max),REAL((0.,-1.)*ALPHA*y(1,k)/max)
-  20      format ( 1x, 3(e17.8,2x) )
+  20      format (1x,3(ES17.8E3,1x) )
         end do
       end if
 

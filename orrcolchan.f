@@ -28,7 +28,7 @@ c***********************************************************************
       character*1 type
       
       common      /data/   n,eta,th,m1,m2,m3,m4,c,u,d1u,d2u,Re,v,
-     .                     alpha,omega,type
+     &                     alpha,omega,type
       common      /deriv/  D1,D2,D3,D4,lmap
       common      /matrix/ A4, A3, A2, A1, A0, B2, B1, B0
 c***********************************************************************
@@ -92,7 +92,7 @@ c***********************************************************************
       character*1 type
       
       common      /data/   n,eta,th,m1,m2,m3,m4,c,u,d1u,d2u,Re,v,
-     .                     alpha,omega,type
+     &                     alpha,omega,type
       common      /deriv/  D1,D2,D3,D4,lmap
       common      /matrix/ A4, A3, A2, A1, A0, B2, B1, B0
 c***********************************************************************
@@ -172,7 +172,7 @@ c***********************************************************************
       character*1 type
       
       common      /data/   n,eta,th,m1,m2,m3,m4,c,u,d1u,d2u,Re,v,
-     .                     alpha,omega,type
+     &                     alpha,omega,type
       common      /deriv/  D1,D2,D3,D4,lmap
       common      /matrix/ A4, A3, A2, A1, A0, B2, B1, B0
 c***********************************************************************
@@ -216,7 +216,7 @@ c***********************************************************************
       character*1 type
       
       common      /data/   n,eta,th,m1,m2,m3,m4,c,u,d1u,d2u,Re,v,
-     .                     alpha,omega,type
+     &                     alpha,omega,type
       common      /deriv/  D1,D2,D3,D4,lmap
       common      /matrix/ A4, A3, A2, A1, A0, B2, B1, B0
 c***********************************************************************
@@ -287,7 +287,7 @@ c***********************************************************************
       character*1 type
       
       common      /data/   n,eta,th,m1,m2,m3,m4,c,u,d1u,d2u,Re,v,
-     .                     alpha,omega,type
+     &                     alpha,omega,type
       common      /deriv/  D1,D2,D3,D4,lmap
       common      /matrix/ A4, A3, A2, A1, A0, B2, B1, B0
 c***********************************************************************
@@ -323,7 +323,7 @@ c***********************************************************************
 
       do i = 0, n
         work = alpha**4 + cmplx(0.,1.)*alpha**3*Re*U(i) + 
-     .                    cmplx(0.,1.)*alpha*Re*d2u(i)
+     &                    cmplx(0.,1.)*alpha*Re*d2u(i)
         do j = 0, n
           A0(i,j) = work*identity(i,j)
         end do
@@ -371,7 +371,7 @@ c***********************************************************************
       character*1 type
       
       common      /data/   n,eta,th,m1,m2,m3,m4,c,u,d1u,d2u,Re,v,
-     .                     alpha,omega,type
+     &                     alpha,omega,type
       common      /deriv/  D1,D2,D3,D4,lmap
       common      /matrix/ A4, A3, A2, A1, A0, B2, B1, B0
 c***********************************************************************
@@ -428,33 +428,44 @@ c
       A(0,0) = CMPLX(1.0, 0.0) 
       A(n,n) = CMPLX(1.0, 0.0)
 c
-c     The top and bottom rows are trivial so that they could be removed
+c.... Solve the eigenvalue problem
 c
-c      CALL LINCG (N-1, B, LDA, T1, LDA)
-c      CALL MCRCR (N-1, N-1, T1, LDA, N-1, N-1, A, LDA,
-c     .            N-1, N-1, T4, LDA)
+#ifdef USE_ISML
 c
-c      CALL EVCCG (N-1, T4, LDA, eval, evec, ldevec)
+c.... The top and bottom rows are trivial so that they could be removed
+c
+      CALL LINCG (N-1, B, LDA, T1, LDA)
+      CALL MCRCR (N-1, N-1, T1, LDA, N-1, N-1, A, LDA,
+     &            N-1, N-1, T4, LDA)
 
+      CALL EVCCG (N-1, T4, LDA, eval, evec, ldevec)
+#else
       if (.false.) then
-         call ZGETRF(n+1, n+1, B, lda, ipvt, info)
-         call ZGETRS('N', n+1, n+1, B, lda, ipvt, A, lda, info)
-         call ZGEEV('V', 'V', n+1, A, lda, eval, avec,
-     .              lda, evec, lda, work, lwork, rwork, info)
-      else
-         call ZGEGV( 'V', 'V', N+1, A, LDA, B, LDA, alp, beta, avec, 
-     .               LDA, evec, LDA, work, lwork, rwork, info)
 c
-c.... compute the eigenvalues
+c.... Cannot use this as B is singular 
+c
+         call ZGETRF(N+1, N+1, B, lda, ipvt, info)
+         call ZGETRS('N', N+1, N+1, B, lda, ipvt, A, lda, info)
+         call ZGEEV('V', 'V', N+1, A, lda, eval, avec,
+     &              lda, evec, lda, work, lwork, rwork, info)
+      else
+c
+c.... Use generalized engenvalue solver
+c
+         call ZGEGV( 'V', 'V', N+1, A, LDA, B, LDA, alp, beta, avec, 
+     &               LDA, evec, LDA, work, lwork, rwork, info)
+c
+c.... compute the eigenvalues as ratios of alp and beta
 c
          do i = 0, N
-            if (beta(i).ne.0) then
-               eval(i) = alp(i)/beta(i)
-            else
-               eval(i) = 0.0
-            end if
+           if (beta(i).ne.0) then
+             eval(i) = alp(i)/beta(i)
+           else
+             eval(i) = 0.0
+           end if
          end do
       end if
+#endif
 c
 c     Sort the eigenvalues.
 c      
@@ -491,7 +502,7 @@ c
       do i = 0, N
         omega(i) = eval(i)
         write (*,35) i, REAL(omega(i)), IMAG(omega(i)), 
-     .               REAL(omega(i)/alpha), IMAG(omega(i)/alpha)
+     &               REAL(omega(i)/alpha), IMAG(omega(i)/alpha)
   35    format (1x,i5,2x,4(1pe17.10,1x))
       end do
      
@@ -533,8 +544,8 @@ c       call CHEBYSHEV(temp2,n,1)
         open(10)
         do i = 0, N
           write (11,999) eta(i), 
-     .                   real(evec(i,which)), aimag(evec(i,which)), 
-     .                   real(avec(i,which)), aimag(avec(i,which))
+     &                   real(evec(i,which)), aimag(evec(i,which)), 
+     &                   real(avec(i,which)), aimag(avec(i,which))
  999      format (1x,6(ES16.8E3,1x))
         end do
         close(11)
@@ -823,7 +834,7 @@ C***********************************************************************
           IF (ABS(N-M).LE.NDIM) THEN
             DO J = 0, NDIM
               E(N,J) = E(N,J)+ DBLE(C(ABS(N-M))) * A(ABS(N-M)) *
-     .                         DBLE(C(ABS(M)))   * B(ABS(M),J)
+     &                         DBLE(C(ABS(M)))   * B(ABS(M),J)
             END DO
           END IF
         END DO
@@ -915,10 +926,10 @@ C**************************************************************************
             D(J,K) = -1.0*(2.*FLOAT(N)**2+1.0)/6.0
           ELSE IF (J.EQ.K) THEN
             D(J,K) =  -1.0*COS(FLOAT(J)*PI/FLOAT(N))/
-     .                (2.*(1.-(COS(FLOAT(J)*PI/FLOAT(N)))**2))
+     &                (2.*(1.-(COS(FLOAT(J)*PI/FLOAT(N)))**2))
           ELSE
             D(J,K) = C(J)*(-1.0)**(J+K)/(C(K)*(COS(FLOAT(J)*PI/
-     .               FLOAT(N))-COS(FLOAT(K)*PI/FLOAT(N))))
+     &               FLOAT(N))-COS(FLOAT(K)*PI/FLOAT(N))))
           END IF
         END DO
       END DO

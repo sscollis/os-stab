@@ -108,7 +108,7 @@ docs:
 clean-docs:
 	/bin/rm -rf html latex
 
-conte: conte.o shoot.o
+conte: conte.o shoot.o $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
 	$(FC) $(LIB) shoot.o conte.o -o conte
 
 contebl: contebl.o shoot.o $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
