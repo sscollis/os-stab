@@ -1065,9 +1065,6 @@ c
         call HUNT (X,N,XX,I)
       END IF
       IOLD = I
-c
-c     Try out a bubble sort
-c
 #elif 1
       I = IOLD
       IF (XX.EQ.X(1)) THEN
