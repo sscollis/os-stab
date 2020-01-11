@@ -30,6 +30,7 @@ c                          unused variables.
 c               2-11-93    Improved the output capabilities and made
 c                          and input/output nondimensional using the 
 c                          displacement thickness.
+c               1-11-2020  Update for gfortan and github
 c
 c***********************************************************************
 c     Common variables
@@ -540,20 +541,20 @@ c       Write out the eigenfunction, its higher derivatives, and
 c       u and v disturbance velocities
 c
         x = 0.0
-        ntime = 4
+        ntime = 8
         do k = 0, nstep
           t = (tf - h*k)*SQRT(2.)/1.7207876
           write (11,20) t, REAL(y(1,k)/max),AIMAG(y(1,k)/max)
           write (12,20) t, REAL(y(2,k)/max),AIMAG(y(2,k)/max)
           write (13,20) t, REAL(y(3,k)/max),AIMAG(y(3,k)/max)
           write (14,20) t, REAL(y(4,k)/max),AIMAG(y(4,k)/max)
-c         dtime = pi/REAL(omega)/ntime
-c         write (15,21) t, (REAL(y(2,k)/max*CEXP((0.,1.)*
-c     &                 (alpha*x-omega*i*dtime))), i = 0, ntime)
-c         write (16,21) t, (REAL((0.,-1.)*ALPHA*y(1,k)/max*CEXP((0.,1.)*
-c     &                 (alpha*x-omega*i*dtime))), i = 0, ntime)
-  20      format ( 1x, 3(e15.8,2x) )
-  21      format ( 1x, e15.8, 2x, 5(e15.8,1x) )
+          dtime = pi/REAL(omega)/ntime
+          write (15,21) t, (REAL(y(2,k)/max*CEXP((0.,1.)*
+     &                  (alpha*x-omega*i*dtime))), i = 0, ntime)
+          write (16,21) t, (REAL((0.,-1.)*ALPHA*y(1,k)/max*CEXP((0.,1.)*
+     &                  (alpha*x-omega*i*dtime))), i = 0, ntime)
+  20      format ( 3(es16.8e3,1x) )
+  21      format ( es16.8e3, 1x, 16(es16.8e3,1x) )
         end do
 c
 c.... form u and v
