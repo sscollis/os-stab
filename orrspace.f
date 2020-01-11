@@ -1,4 +1,10 @@
 c***********************************************************************
+c> \file orrspace.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible boundary
+c>        layers solving first the Blasius equation for spatially
+C>        growing waves.
+c> \author S. Scott Collis
+c***********************************************************************
       program OrrSom
 c***********************************************************************
 c 
@@ -143,6 +149,11 @@ c
 c     Fix to make my nondimensionalization match Mack's
 c     using displacement thickness to nondimensionalize
 c
+#define USE_DISPLACEMENT_THICKNESS
+#ifdef USE_DISPLACEMENT_THICKNESS
+      write(*,150) 
+ 150  format(/,'Note:  changing nondimsensionalization to ',
+     &       'displacement thickness...',/)
       Re = Re*SQRT(2.)/1.7207876
       alpha = alpha*SQRT(2.)/1.7207876
       omega = omega*SQRT(2.)/1.7207876
@@ -150,6 +161,7 @@ c
       ymin = ymin*SQRT(2.)/1.7207876
       ymax = ymax*SQRT(2.)/1.7207876
       h = (ymax-ymin)/float(n)
+#endif
       
       if (n .gt. idim) then
         write (*,300) 
@@ -489,6 +501,13 @@ c
 c       Second Pass
 c
         max = 0.0
+        k = nstep
+        do i = 1, n
+          y(i,k) = 0.0
+          do m = 1, n-r
+            y(i,k) = y(i,k) + U(i,m,k)*B(m,q)
+          end do
+        end do
         do m = 1, n-r
           B(m,q-1) = 0.0
           do j = 1, n-r

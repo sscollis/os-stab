@@ -1,4 +1,9 @@
 c***********************************************************************
+c> \file orrsom.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible boundary
+c>        layers solving first the Blasius equation 
+c> \author S. Scott Collis
+c***********************************************************************
       program OrrSom
 c***********************************************************************
 c 
@@ -19,6 +24,7 @@ c
 c     Date:     7-17-92
 c
 c     Revised:  10-29-92     changed tabs to spaces <-- big deal
+c     Revised:  1-11-2020    code cleanup
 c
 c***********************************************************************
 c     Common variables
