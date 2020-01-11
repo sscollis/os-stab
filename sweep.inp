@@ -1,0 +1,21 @@
+#
+# Blasius boundary layer input file 
+# (nondimensionalized by displacement thickness)
+#
+# Set nbl = nstep or you don't get good eigenfunctions?
+#
+nbl = 1000              # number of in profile
+nstep = 1000            # number of integration points
+testalpha = 0.9         # Ortho. constraint (0 - 1)
+Re = 1000.0             # Reynolds number
+beta = 0.0              # Falker-Skan parameter
+fp2 = 0.50              # Guess for profile slope
+alphar = 0.13809592E+00     # Real part of alpha
+alphai = 0.51958399E-02       # Imag part of alpha
+omegar = 0.042          # Guess for Re(omega)
+omegai = 0.00           # Guess for Im(omega)
+Ymin = 0.0              # Minimum Y
+Ymax = 20.0             # Maximum Y
+niter = 50              # number of iterations
+domega = 0.002           # step size
+eigfun = 1              # compute eigenfunctions
