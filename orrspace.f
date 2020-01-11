@@ -55,7 +55,7 @@ c***********************************************************************
       parameter     (neq=4, inunit=20)
       complex       bc1(neq), bc2(neq), c
       real          testalpha, omegar, omegai, alphar, alphai
-      real          Domega
+      real          Domega, fact, facti
       integer       i, nstep, niter
       integer       eigfun
       character*1   input
@@ -73,6 +73,8 @@ c     fort.14     phi'''(y)
 c
 c     fort.15     u disturbance
 c     fort.16     v disturbance
+c     fort.17     eigenvalues during sweep
+c     fort.18     u, v eigenfunctions
 c
       eigfun = 1
 c
@@ -155,12 +157,14 @@ c
       write(*,150) 
  150  format(/,1x,'Note:  changing nondimsensionalization to ',
      &       'displacement thickness to match Mack...',/)
-      Re = Re*SQRT(2.)/1.7207876
-      alpha = alpha*SQRT(2.)/1.7207876
-      omega = omega*SQRT(2.)/1.7207876
-      Domega = Domega*SQRT(2.)/1.7207876
-      ymin = ymin*SQRT(2.)/1.7207876
-      ymax = ymax*SQRT(2.)/1.7207876
+      fact = SQRT(2.0)/1.7207876
+      facti = 1.0/fact
+      Re = Re*fact
+      alpha = alpha*fact
+      omega = omega*fact
+      Domega = Domega*fact
+      ymin = ymin*fact
+      ymax = ymax*fact
       h = (ymax-ymin)/float(n)
 #endif
       
@@ -181,9 +185,9 @@ c
       
       do i = 1, niter
         call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,eigfun)
-        write (17,30) REAL(omega*1.7207876/SQRT(2.)),
-     &                REAL(alpha*1.7207876/SQRT(2.)),
-     &                AIMAG(alpha*1.7207876/SQRT(2.))
+        write (17,30) REAL(omega*facti),
+     &                REAL(alpha*facti),
+     &                AIMAG(alpha*facti)
   30    format (1x,3(e17.8,2x))
         omegar = REAL(omega)+Domega
         omegai = AIMAG(omega)
@@ -270,7 +274,7 @@ c     Begin the eigenvalue iteration loop
 c
       icount = 1
       err = 1.
-      do while ((abs(err) .ge. 1.0e-8) .and. (icount .le. 20) .and.
+      do while ((abs(err) .ge. 1.0e-8) .and. (icount .le. 50) .and.
      &          (abs(alpha-cm1) .ge. 1.0e-12) )
         q = 0
         tq(0) = tf
@@ -561,17 +565,17 @@ c.... form u and v
 c
         max = 0.0
         do k = 0, nstep
-           uu(k) = y(2,k)
-           vv(k) = (0.,-1.)*ALPHA*y(1,k)
-           if (abs(uu(k)) .gt. abs(max)) max = uu(k) 
+          uu(k) = y(2,k)
+          vv(k) = (0.,-1.)*ALPHA*y(1,k)
+          if (abs(uu(k)) .gt. abs(max)) max = uu(k) 
         end do
         do k = 0, nstep
-           t = (tf - h*k)*SQRT(2.)/1.7207876
-           uu(k) = uu(k) / max
-           vv(k) = vv(k) / max
-           write (19,21) t, real(uu(k)), aimag(uu(k)), 
-     &                      real(vv(k)), aimag(vv(k))
-       end do
+          t = (tf - h*k)*SQRT(2.)/1.7207876
+          uu(k) = uu(k) / max
+          vv(k) = vv(k) / max
+          write (18,21) t, real(uu(k)), aimag(uu(k)), 
+     &                     real(vv(k)), aimag(vv(k))
+        end do
       end if
 c
       return
