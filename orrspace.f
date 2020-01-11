@@ -152,8 +152,8 @@ c
 #define USE_DISPLACEMENT_THICKNESS
 #ifdef USE_DISPLACEMENT_THICKNESS
       write(*,150) 
- 150  format(/,'Note:  changing nondimsensionalization to ',
-     &       'displacement thickness...',/)
+ 150  format(/,1x,'Note:  changing nondimsensionalization to ',
+     &       'displacement thickness to match Mack...',/)
       Re = Re*SQRT(2.)/1.7207876
       alpha = alpha*SQRT(2.)/1.7207876
       omega = omega*SQRT(2.)/1.7207876
