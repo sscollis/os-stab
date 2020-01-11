@@ -1,3 +1,9 @@
+c***********************************************************************
+c> \file orrucbfs.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible backward
+c>        facing step with a moving reference frame
+c> \author S. Scott Collis
+c***********************************************************************
       program orr_uc_bfs
 c***********************************************************************
 c

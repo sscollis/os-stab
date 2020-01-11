@@ -1,3 +1,9 @@
+c***********************************************************************
+c> \file orrcolchan.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible 
+c>        planar channel flow 
+c> \author S. Scott Collis
+c***********************************************************************
       program Orr_col
 c***********************************************************************
 c

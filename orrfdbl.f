@@ -1,3 +1,10 @@
+c***********************************************************************
+c> \file orrfdbl.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible boundary
+c>        layers solving first the Blasius equation using
+c>        finite-differences
+c> \author S. Scott Collis
+c***********************************************************************
       program orr_fd_bl
 c***********************************************************************
 c

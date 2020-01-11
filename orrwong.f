@@ -1,9 +1,16 @@
-      program orr_bfs
+c***********************************************************************
+c> \file orrwong.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible
+c>        for a truncated bl profile with slip upper boundary
+c> \author S. Scott Collis
+c***********************************************************************
+      program orr_wong
 c***********************************************************************
 c
 c     Purpose:  This program solves the Orr-Sommerfeld equation using a 
 c               Chebyshev-collocation method for a truncated blasius
 c               boundary layer profile.
+c
 c               The boundary conditions are basically that of a channel
 c               with a slip wall at the upper boundary.
 c

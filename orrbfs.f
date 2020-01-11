@@ -1,3 +1,9 @@
+c***********************************************************************
+c> \file orrbfs.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible
+c>        backward-facing step with slip boundary on upper wall 
+c> \author S. Scott Collis
+c***********************************************************************
       program orr_bfs
 c***********************************************************************
 c

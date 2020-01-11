@@ -1,3 +1,9 @@
+c***********************************************************************
+c> \file orrcolbl.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible boundary
+c>        layers solving first the Blasius equation using collocation
+c> \author S. Scott Collis
+c***********************************************************************
       program Orr_col_bl
 c***********************************************************************
 c

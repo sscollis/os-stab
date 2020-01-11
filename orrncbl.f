@@ -1,3 +1,9 @@
+c***********************************************************************
+c> \file orrncbl.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible boundary
+c>        layers solving first the Blasius equation neutral curve
+c> \author S. Scott Collis
+c***********************************************************************
       program orr_nc_bl
 c***********************************************************************
 c

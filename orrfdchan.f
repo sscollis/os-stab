@@ -1,3 +1,9 @@
+c***********************************************************************
+c> \file orrfdchan.f
+c> \brief Solves the Orr-Sommerfeld equation for incompressible planar 
+c>        channel flow using finite-differences
+c> \author S. Scott Collis
+c***********************************************************************
       program orr_fd_chan
 c***********************************************************************
 c
