@@ -43,7 +43,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       complex     omega, alpha
       real        Re
@@ -181,8 +181,8 @@ c
       do i = 1, niter
         call CONTE(nstep,testalpha,neq,2,bc1,bc2,ymin,ymax,eigfun)
         write (17,30) REAL(omega*1.7207876/SQRT(2.)),
-     .                REAL(alpha*1.7207876/SQRT(2.)),
-     .                AIMAG(alpha*1.7207876/SQRT(2.))
+     &                REAL(alpha*1.7207876/SQRT(2.)),
+     &                AIMAG(alpha*1.7207876/SQRT(2.))
   30    format (1x,3(e17.8,2x))
         omegar = REAL(omega)+Domega
         omegai = AIMAG(omega)
@@ -270,7 +270,7 @@ c
       icount = 1
       err = 1.
       do while ((abs(err) .ge. 1.0e-8) .and. (icount .le. 20) .and.
-     .          (abs(alpha-cm1) .ge. 1.0e-12) )
+     &          (abs(alpha-cm1) .ge. 1.0e-12) )
         q = 0
         tq(0) = tf
 c
@@ -397,7 +397,7 @@ c
                   P(j,i,q) = 0.0
                   do s = i, j-1
                     P(j,i,q) = P(j,i,q)-inprod(n,U(1,j,k),z(1,s))/w(j)*
-     .              P(s,i,q)
+     &              P(s,i,q)
                   end do
                 end if
               end do
@@ -467,7 +467,7 @@ c
           Bt = (2.*qt+1.)*err-(1.+qt)**2*errm1+qt**2*errm2
           Ct = (1.+qt)*err
           if ( ABS(Bt+SQRT(Bt**2-4.*At*Ct)) .gt. 
-     .         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
+     &         ABS(Bt-SQRT(Bt**2-4.*At*Ct)) )  then
             alpha = ctemp-(ctemp-cm1)*2.*Ct/(Bt+SQRT(Bt**2-4.*At*Ct))
           else
             alpha = ctemp-(ctemp-cm1)*2.*Ct/(Bt-SQRT(Bt**2-4.*At*Ct))
@@ -478,8 +478,8 @@ c
           errm1 = err
         end if
         write (*,30) icount,real(ctemp)*1.7207877/SQRT(2.),
-     .               aimag(ctemp)*1.7207877/SQRT(2.),
-     .               real(err), aimag(err), abs(err)
+     &               aimag(ctemp)*1.7207877/SQRT(2.),
+     &               real(err), aimag(err), abs(err)
   30    format (1x,i2,4x,e15.8,1x,e15.8,4x,e15.8,1x,e15.8,4x,e15.8)
         icount = icount + 1
       end do
@@ -488,11 +488,11 @@ c     Write out the converged eigenvalue
 c
       alpha = ctemp
       write (*,40) real(omega)*1.7207877/SQRT(2.), 
-     .             aimag(omega)*1.7207877/SQRT(2.), 
-     .             real(alpha)*1.7207877/SQRT(2.),
-     .             aimag(alpha)*1.7207877/SQRT(2.)
+     &             aimag(omega)*1.7207877/SQRT(2.), 
+     &             real(alpha)*1.7207877/SQRT(2.),
+     &             aimag(alpha)*1.7207877/SQRT(2.)
   40  format (/,'Omega = (',e15.8,1x,e15.8,')',4x,
-     .          'Alpha = (',e15.8,1x,e15.8,')',/)
+     &          'Alpha = (',e15.8,1x,e15.8,')',/)
 c
 c     If you would like to see the eigenfunction
 c
@@ -549,9 +549,9 @@ c
           write (14,20) t, REAL(y(4,k)/max),AIMAG(y(4,k)/max)
 c         dtime = pi/REAL(omega)/ntime
 c         write (15,21) t, (REAL(y(2,k)/max*CEXP((0.,1.)*
-c     .                 (alpha*x-omega*i*dtime))), i = 0, ntime)
+c     &                 (alpha*x-omega*i*dtime))), i = 0, ntime)
 c         write (16,21) t, (REAL((0.,-1.)*ALPHA*y(1,k)/max*CEXP((0.,1.)*
-c     .                 (alpha*x-omega*i*dtime))), i = 0, ntime)
+c     &                 (alpha*x-omega*i*dtime))), i = 0, ntime)
   20      format ( 1x, 3(e15.8,2x) )
   21      format ( 1x, e15.8, 2x, 5(e15.8,1x) )
         end do
@@ -569,7 +569,7 @@ c
            uu(k) = uu(k) / max
            vv(k) = vv(k) / max
            write (19,21) t, real(uu(k)), aimag(uu(k)), 
-     .                      real(vv(k)), aimag(vv(k))
+     &                      real(vv(k)), aimag(vv(k))
        end do
       end if
 c
@@ -614,7 +614,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       complex     omega, alpha
       real        Re
@@ -636,9 +636,9 @@ c
       do j = 1 , neq-1
         yf(j) = yo(j+1)
       end do
-      yf(neq) = (1./alpha/Re*(2.*alpha**2*yo(3)-alpha**4*yo(1)) + 
-     .          (0.,1.)*((UU-omega/alpha)*(yo(3)-alpha**2*yo(1))-
-     .          d2UU*yo(1)))*alpha*Re 
+      yf(neq) = (2.*alpha**2*yo(3)-alpha**4*yo(1)) + 
+     &          (0.,1.)*alpha*Re*((UU-omega/alpha)*
+     &          (yo(3)-alpha**2*yo(1))-d2UU*yo(1))
 
       return
       end
@@ -659,7 +659,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       complex     omega, alpha
       real        Re
@@ -682,8 +682,8 @@ c
       yf(j) = yo(j+1)
       end do
       yf(neq) = 2.*alpha**2*yo(3)-alpha**4*yo(1) + 
-     .          (0.,1.)*alpha*Re*((UU-omega/alpha)*
-     .          (yo(3)-alpha**2*yo(1))-d2UU*yo(1)) 
+     &          (0.,1.)*alpha*Re*((UU-omega/alpha)*
+     &          (yo(3)-alpha**2*yo(1))-d2UU*yo(1)) 
 
       return
       end
@@ -705,7 +705,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       complex     omega, alpha
       real        Re
@@ -758,7 +758,7 @@ c
         else
           xi3temp = xi(3,0)
           xi(3,0) = xi(3,0)+((xi3old-xi(3,0))/(xi2old-xi(2,n)))*
-     .              (1.0 - xi(2,n))
+     &              (1.0 - xi(2,n))
           xi3old = xi3temp
         end if
         p = p + 1
@@ -826,7 +826,7 @@ c***********************************************************************
       real        Uspl(0:idim), d2Uspl(0:idim), ydat(0:idim), f2p
 
       common      /data/  n, u, d2u, ymin, ymax, h, f2p,
-     .                    gamma, beta, uspl, d2uspl, ydat
+     &                    gamma, beta, uspl, d2uspl, ydat
      
       complex     omega, alpha
       real        Re
