@@ -1,4 +1,8 @@
 #
+# Input for temporal Orr-Sommerfeld Solvers
+#
+#   contebl.f, orrsom.f
+#
 # Blasius boundary layer input file
 #
 nbl = 2000              # number of in profile

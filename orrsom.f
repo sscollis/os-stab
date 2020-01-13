@@ -53,7 +53,7 @@ c***********************************************************************
       inunit = 20
       
       write (*,10)
-  10  format (/,10x,'Solve Orr-Sommerfeld (Shooting)',/)
+  10  format (/,5x,'Solve Orr-Sommerfeld (Shooting) Temporal Problem',/)
 #ifdef USE_FILE_INPUT
       write (*,60)
   60  format (/,1x,'Enter filename ==> ',$)
