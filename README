@@ -5,6 +5,9 @@ Updated Orr-Sommerfeld solvers for gfortran
   conte.f     Solves OS for channel using Godunov-Conte shooting
   contebl.f   Solve Blasius and then OS for boundary layer using Conte
   bl.f        Spectral collocation solver for Blasius equation
+  orrsom.f    Similar to contebl.f
+  shoot.f     Collection of general routines
+  orrspace.f  Solves spatial problem for boundary layers
 
 Numerous updates in this version include:
 
@@ -14,6 +17,8 @@ Numerous updates in this version include:
   4. Updated to support gfortran in makefile
   5. Added scripts for gnuplot output
   6. Improved some inline documentation
+  7. Use OpenBLAS for numerical linear algebra
+  8. Works on Mac OS-X (Darwin)
 
 7-13-97
 
