@@ -1,5 +1,7 @@
 #
-# Blasius boundary layer input file 
+# Input file for orrspace.f
+#
+# For the Blasius boundary layer 
 # (nondimensionalized by displacement thickness)
 #
 # Set nbl = nstep or you don't get good eigenfunctions?
