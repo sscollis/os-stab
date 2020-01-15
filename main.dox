@@ -35,6 +35,9 @@ The spatial eigenproblem representes the spatial evolution of disturbances of
 a given (real-valued) frequency \f$c\f$ where the eigenvalue is the spatial
 wavenumber \f$\alpha\f$ and the imaginary part of \f$\alpha\f$ denotes the
 spatial growth rate, i.e. the rate that waves grow as the propogate downstream.
+We note in passing that the spatial eigenproblem is more difficult to solve
+since the eigenvalue \f$\alpha\f$ appears nonlinearly in the Orr-Sommerfeld
+equation.
 
 The typical temporal problem is solved by conte.f for channel flow while
 the spatial problem for the Blasius boundary layer is solved by orrspace.f.
