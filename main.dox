@@ -23,7 +23,21 @@ This is a collection of solvers for the incompressible Orr-Sommerfled equation
 where \f$Re\f$ is the Reynolds number, \f$\alpha\f$ is the spatial wavenumber 
 in the streamwise direction \f$x\f$, \f$U(y)\f$ is the mean velocity profile, 
 \f$u(y)\f$ is the complex valued eigenvector, \f$c\f$ is the complex 
-eigenvalue, and \f$y\f$ is the crossstream (wall normal) direction.
+valued frequency, and \f$y\f$ is the crossstream (wall normal) direction.
+
+In the temporal eigenproblem, the eigenvalue is the complex-valued frequency 
+\f$c\f$ given a specified (real-valued) wavenumber \f$\alpha\f$.  This is 
+the appropriate problem, for example, to describe the temporal evolution of 
+disturbances in a spatially periodic plane, parallel channel where the 
+imaginary part of the frequency represents the temporal growth-rate.
+
+The spatial eigenproblem representes the spatial evolution of disturbances of
+a given (real-valued) frequency \f$c\f$ where the eigenvalue is the spatial
+wavenumber \f$\alpha\f$ and the imaginary part of \f$\alpha\f$ denotes the
+spatial growth rate, i.e. the rate that waves grow as the propogate downstream.
+
+The typical temporal problem is solved by conte.f for channel flow while
+the spatial problem for the Blasius boundary layer is solved by orrspace.f.
 
 Solvers are also provided to solve the Blasius equation for boundary-layer 
 velocity profiles as well as specific solvers to find the neutral curve 
