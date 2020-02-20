@@ -117,7 +117,7 @@ help:
 	@echo '==========================================================='
 	@echo ' USE_NR_ALL=1  Will activate and use Numerical Recipes'
 	@echo '               ODEINT and HUNT in nr.f if you have license'
-	@echo '               and code to do so'	
+	@echo '               and code to do so. Other will error out.'	
 	@echo ' USE_RKCK45=1  Uses RKCK45 integration (best option)'
 	@echo ' USE_VODE=1    Experimental use of VODE integrator'
 	@echo ' USE_LSRK14=1  Uses low-storage RK14 ok, but RKCK45 better'
