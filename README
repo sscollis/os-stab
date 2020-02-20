@@ -1,6 +1,28 @@
 Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
 Layer.  Also bl.f is a spectral blasius flow solver.
 
+Building
+========
+
+Should build on platforms with Gfortran.  Start by typing:
+
+make help
+
+Default build is:
+
+make 
+
+Recommended build is:
+
+make USE_RKCK45=1
+
+You can make the Doxygen documentation using:
+
+make docs
+
+Running
+=======
+
 The simplest case is temporal stability analysis for a planar channel using
 Conte's method and shooting:
 
