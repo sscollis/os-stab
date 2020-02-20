@@ -26,13 +26,15 @@ Running
 The simplest case is temporal stability analysis for a planar channel using
 Conte's method and shooting:
 
-./conte < chan.inp
+./conte
+Enter "d" for default values 
 
 A similar analysis for the Blasius boundary layer is done using:
 
-./contebl < contbl.inp
+./contebl
+Enter "d" for default values 
 
-or the similar
+or the similar which takes input fron stdin
 
 ./orrsom < test.inp
 
@@ -45,11 +47,20 @@ A spatial analysis for BL is done using:
 ./orrsspace 
 And then type space.inp for input file
 
-You can do a sweep through the stability curve using
+You can do a sweep through the stability curve using:
 
 ./orrspace
 sweep.inp
 
+To do a sweep in alpha using finite-differences:
+
+orrfdchan < fd-128.inp
+
+or a single alpha and printing the eigenfunction:
+
+orrfdchan < fdchan.inp
+
+NOTE:  There currently are not example inputs for all codes!
 
 12-30-2019
 
