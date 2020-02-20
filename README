@@ -1,3 +1,34 @@
+Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
+Layer.  Also bl.f is a spectral blasius flow solver.
+
+The simplest case is temporal stability analysis for a planar channel using
+Conte's method and shooting:
+
+./conte < chan.inp
+
+A similar analysis for the Blasius boundary layer is done using:
+
+./contebl < contbl.inp
+
+or the similar
+
+./orrsom < test.inp
+
+Just computing the Blasisus boundary layer alone (no eigenanalysis):
+
+./bl < bl.inp
+
+A spatial analysis for BL is done using:
+
+./orrsspace 
+And then type space.inp for input file
+
+You can do a sweep through the stability curve using
+
+./orrspace
+sweep.inp
+
+
 12-30-2019
 
 Updated Orr-Sommerfeld solvers for gfortran 
