@@ -58,6 +58,16 @@ You can do a sweep through the stability curve using:
 
 And enter `sweep.inp` as the input file.
 
+#### Additional examples
+
+These examples require that one currently builds with `USE_ALL_NR=1` that 
+requires the user to supply commercially licenses code from Numerical Recipes
+in a file called `nr.f`.  These routines are currently only used sparingly and
+can/should be replaced with open source code as time permits. 
+
+Nevertheless, you must have a valid license to use Numerical Recipes code
+and you must now check such code into this repository!
+
 To do a sweep in alpha using finite-differences:
 
     orrfdchan < fd-128.inp

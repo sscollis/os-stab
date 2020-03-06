@@ -49,7 +49,7 @@ c
 c     Setup IMSL workspace
 c
 #ifdef USE_IMSL
-      REAL             RWKSP(150000)
+      REAL RWKSP(150000)
       COMMON /WORKSP/  RWKSP
       call IWKIN(150000)
 #endif
