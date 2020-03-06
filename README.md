@@ -23,6 +23,13 @@ You can make the Doxygen documentation using:
 
     make docs
 
+and then you can view the documentation locally by pointing your browser at
+`html/index.html`. For example, on a Mac you simply type
+
+    open html/index.html
+
+from within the main `os-stab` directory.
+
 ### Running
 
 The simplest case is temporal stability analysis for a planar channel using
