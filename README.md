@@ -106,7 +106,7 @@ Numerous updates in this version include:
 ### Updates as of 7-13-97
 
 Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
-Layer.  Also bl.f is a spectral blasius flow solver.
+Layer.  Also `bl.f` is a spectral blasius flow solver.
 
 ### Updates as of 3-07-2001
 
