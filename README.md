@@ -1,7 +1,9 @@
 ## OS-Stab
 
-Incompressible Orr--Sommerfeld Stability Solvers for Channel flow and 
-Blasius Boundary Layer.  Also `bl.f` is a spectral blasius flow solver.
+Performs stability analsysis for incompressible flows by solving the Orr-Sommerfeld equation 
+for planar channel flow and the Blasius boundary layer.  Also includes `bl.f` which is a 
+spectral collocation Blasius flow solver and there are also shooting-based Blasius solvers
+embedded within the stability solvers (see below).
 
 ### Building
 
@@ -48,13 +50,13 @@ A spatial analysis for BL is done using:
 
     ./orrsspace 
 
-And then type space.inp for input file
+And then type `space.inp` for input file.
 
 You can do a sweep through the stability curve using:
 
     ./orrspace
 
-And enter `sweep.inp`
+And enter `sweep.inp` as the input file.
 
 To do a sweep in alpha using finite-differences:
 
