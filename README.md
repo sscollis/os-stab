@@ -1,77 +1,83 @@
-Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
-Layer.  Also bl.f is a spectral blasius flow solver.
+## OS-Stab
 
-Building
-========
+Incompressible Orr--Sommerfeld Stability Solvers for Channel flow and 
+Blasius Boundary Layer.  Also `bl.f` is a spectral blasius flow solver.
+
+### Building
 
 Should build on platforms with Gfortran.  Start by typing:
 
-make help
+    make help
 
 Default build is:
 
-make 
+    make 
 
 Recommended build is:
 
-make USE_RKCK45=1
+    make USE_RKCK45=1
 
 You can make the Doxygen documentation using:
 
-make docs
+    make docs
 
-Running
-=======
+### Running
 
 The simplest case is temporal stability analysis for a planar channel using
 Conte's method and shooting:
 
-./conte
+    ./conte
+
 Enter "d" for default values 
 
 A similar analysis for the Blasius boundary layer is done using:
 
-./contebl
+    ./contebl
+
 Enter "d" for default values 
 
 or the similar which takes input fron stdin
 
-./orrsom < test.inp
+    ./orrsom < test.inp
 
 Just computing the Blasisus boundary layer alone (no eigenanalysis):
 
-./bl < bl.inp
+    ./bl < bl.inp
 
 A spatial analysis for BL is done using:
 
-./orrsspace 
+    ./orrsspace 
+
 And then type space.inp for input file
 
 You can do a sweep through the stability curve using:
 
-./orrspace
-sweep.inp
+    ./orrspace
+
+And enter `sweep.inp`
 
 To do a sweep in alpha using finite-differences:
 
-orrfdchan < fd-128.inp
+    orrfdchan < fd-128.inp
 
 or a single alpha and printing the eigenfunction:
 
-orrfdchan < fdchan.inp
+    orrfdchan < fdchan.inp
 
 NOTE:  There currently are not example inputs for all codes!
 
-12-30-2019
+### Updates as of 12-30-2019
 
 Updated Orr-Sommerfeld solvers for gfortran 
 
-  conte.f     Solves OS for channel using Godunov-Conte shooting
-  contebl.f   Solve Blasius and then OS for boundary layer using Conte
-  bl.f        Spectral collocation solver for Blasius equation
-  orrsom.f    Similar to contebl.f
-  shoot.f     Collection of general routines
-  orrspace.f  Solves spatial problem for boundary layers
+  Code      |  Description
+------------|----------------------------------------------------------
+  conte.f   | Solves OS for channel using Godunov-Conte shooting
+  contebl.f | Solve Blasius and then OS for boundary layer using Conte
+  bl.f      | Spectral collocation solver for Blasius equation
+  orrsom.f  | Similar to contebl.f
+  shoot.f   | Collection of general routines
+  orrspace.f| Solves spatial problem for boundary layers
 
 Numerous updates in this version include:
 
@@ -84,18 +90,18 @@ Numerous updates in this version include:
   7. Use OpenBLAS for numerical linear algebra
   8. Works on Mac OS-X (Darwin)
 
-7-13-97
+### Updates as of 7-13-97
 
 Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
 Layer.  Also bl.f is a spectral blasius flow solver.
 
-3-07-2001
+### Updates as of 3-07-2001
 
 I have updated the following codes to use LAPack routines
 
-orrncbl.f	This finds the neutral curve for Boundary layer and
-		channel profiles
+`orrncbl.f`	This finds the neutral curve for Boundary layer and
+channel profiles
 
-orrcolchan.f	Solve Orr-Sommerfeld for channel profile
+`orrcolchan.f`	Solve Orr-Sommerfeld for channel profile
 
 S. Scott Collis
