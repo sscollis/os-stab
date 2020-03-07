@@ -22,7 +22,7 @@ using `contebl.f` is shown below:
 
 The eigenfunction for the most unstable Tollmien-Schlichting wave (TS-wave) at `Re=5800`, 
 `alpha=0.179` is shown in the following figure with an complex valued wave speed 
-(eigenvalue) of `c = 0.36412287E+00 + i 0.79597206E-02`
+(eigenvalue) of `c = 0.36412287E+00 + i 0.79597206E-02`.
 
 ![Eigenfunction](https://github.com/sscollis/os-stab/blob/master/images/phi.png)
 
@@ -112,15 +112,15 @@ NOTE:  There currently are not example inputs for all codes!
 
 Updated Orr-Sommerfeld solvers for gfortran 
 
-  Code        |  Description
---------------|---------------------------------------------------------------------------
-  conte.f     | Solves OS for channel using Godunov-Conte shooting
-  contebl.f   | Solve Blasius and then OS for boundary layer using Conte
-  bl.f        | Spectral collocation solver for Blasius equation
-  orrsom.f    | Similar to contebl.f
-  shoot.f     | Collection of general routines for shooting
-  orrspace.f  | Solves spatial problem for boundary layers can sweep in frequency
-  orrfdchan.f | Solves temporal channel problem using finite-differences including sweeps 
+  Code          |  Description
+----------------|---------------------------------------------------------------------------
+  'conte.f'     | Solves OS for channel using Godunov-Conte shooting
+  'contebl.f'   | Solve Blasius and then OS for boundary layer using Conte
+  'bl.f'        | Spectral collocation solver for Blasius equation
+  'orrsom.f'    | Similar to `contebl.f`
+  'shoot.f'     | Collection of general routines for shooting
+  'orrspace.f'  | Solves spatial problem for boundary layers can sweep in frequency
+  'orrfdchan.f' | Solves temporal channel problem using finite-differences including sweeps 
 
 Numerous updates in this version include:
 
