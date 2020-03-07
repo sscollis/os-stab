@@ -1,9 +1,16 @@
 ## OS-Stab
 
 Performs stability analsysis for incompressible flows by solving the Orr-Sommerfeld equation 
-for planar channel flow and the Blasius boundary layer.  Also includes `bl.f` which is a 
-spectral collocation Blasius flow solver and there are also shooting-based Blasius solvers
-embedded within the stability solvers (see below).
+for planar channel flow, the Blasius boundary layer, or for a given arbitary mean velocity
+profile.  Note that in all cases, the parallel-flow approximation is made. 
+
+Several different solvers are provided using different numerical methods including stablized
+shooting, Chebyschev spectral collocation, and finite-difference discretization. Solvers
+are also provided for both temporal analysis (real wavenumber, complex wave speed) and
+the more realistic spatial analysis (real frequency, complex wavenumber).
+
+Also includes `bl.f` which is a spectral collocation Blasius flow solver and there are 
+also shooting-based Blasius solvers embedded within the stability solvers (see below).
 
 As an example, the mean Blasius velocity profile and second derivative of that profile computed
 using `contebl.f` is shown below:
