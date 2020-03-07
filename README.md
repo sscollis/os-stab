@@ -1,8 +1,12 @@
 ## OS-Stab
 
+### Description
+
 Performs stability analsysis for incompressible flows by solving the Orr-Sommerfeld equation 
 for planar channel flow, the Blasius boundary layer, or for a given arbitary mean velocity
 profile.  Note that in all cases, the parallel-flow approximation is made. 
+
+### Background
 
 Several different solvers are provided using different numerical methods including stablized
 shooting, Chebyschev spectral collocation, and finite-difference discretization. Solvers
