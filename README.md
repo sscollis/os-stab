@@ -27,6 +27,9 @@ The eigenfunction for the most unstable Tollmien-Schlichting wave (TS-wave) at `
 ![Eigenfunction](https://github.com/sscollis/os-stab/blob/master/images/phi.png)
 
 These results are from running `contebl.f` using default input parameters as described below.
+Note that there are example scripts for making plots of results using `gnuplot`.  These
+scripts have files `*.com` such as `mean.com` for plotting the mean flow profile and 
+`phi.com` for plotting the eigenfunction, phi.
 
 ### Building
 
