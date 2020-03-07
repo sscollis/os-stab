@@ -114,13 +114,13 @@ Updated Orr-Sommerfeld solvers for gfortran
 
   Code          |  Description
 ----------------|---------------------------------------------------------------------------
-  'conte.f'     | Solves OS for channel using Godunov-Conte shooting
-  'contebl.f'   | Solve Blasius and then OS for boundary layer using Conte
-  'bl.f'        | Spectral collocation solver for Blasius equation
-  'orrsom.f'    | Similar to `contebl.f`
-  'shoot.f'     | Collection of general routines for shooting
-  'orrspace.f'  | Solves spatial problem for boundary layers can sweep in frequency
-  'orrfdchan.f' | Solves temporal channel problem using finite-differences including sweeps 
+  `conte.f`     | Solves OS for channel using Godunov-Conte shooting
+  `contebl.f`   | Solve Blasius and then OS for boundary layer using Conte
+  `bl.f`        | Spectral collocation solver for Blasius equation
+  `orrsom.f`    | Similar to `contebl.f`
+  `shoot.f`     | Collection of general routines for shooting
+  `orrspace.f`  | Solves spatial problem for boundary layers can sweep in frequency
+  `orrfdchan.f` | Solves temporal channel problem using finite-differences including sweeps 
 
 Numerous updates in this version include:
 
