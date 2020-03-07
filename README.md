@@ -5,6 +5,10 @@ for planar channel flow and the Blasius boundary layer.  Also includes `bl.f` wh
 spectral collocation Blasius flow solver and there are also shooting-based Blasius solvers
 embedded within the stability solvers (see below).
 
+![Mean Profile](https://github.com/sscollis/os-stab/blob/master/images/mean.png)
+
+![Eigenfunction](https://github.com/sscollis/os-stab/blob/master/images/phi.png)
+
 ### Building
 
 Should build on platforms with Gfortran.  Start by typing:
