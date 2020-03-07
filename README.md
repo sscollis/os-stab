@@ -9,10 +9,13 @@ As an example, the mean Blasius velocity profile and second derivative of that p
 using `contebl.f` is shown below:
 ![Mean Profile](https://github.com/sscollis/os-stab/blob/master/images/mean.png)
 
-The eigenfunction for the most unstable Tollmien-Schlichting wave (TS-wave) at `Re=5800`, `alpha=0.179` is
-shown in the following figure with an complex valued wave speed (eigenvalue) of `c = 0.36412287E+00 + i 0.79597206E-02`
+The eigenfunction for the most unstable Tollmien-Schlichting wave (TS-wave) at `Re=5800`, 
+`alpha=0.179` is shown in the following figure with an complex valued wave speed 
+(eigenvalue) of `c = 0.36412287E+00 + i 0.79597206E-02`
 
 ![Eigenfunction](https://github.com/sscollis/os-stab/blob/master/images/phi.png)
+
+These results are from running `contebl.f` using default input parameters as described below.
 
 ### Building
 
