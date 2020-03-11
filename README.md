@@ -18,6 +18,7 @@ also shooting-based Blasius solvers embedded within the stability solvers (see b
 
 As an example, the mean Blasius velocity profile and second derivative of that profile computed
 using `contebl.f` is shown below:
+
 ![Mean Profile](https://github.com/sscollis/os-stab/blob/master/images/mean.png)
 
 The eigenfunction for the most unstable Tollmien-Schlichting wave (TS-wave) at `Re=5800`, 
