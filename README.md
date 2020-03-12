@@ -38,11 +38,7 @@ phi.
 There are also example scripts for plotting these same results using Python 
 and matplotlib.   See `mean.py` and `phi.py` and these are used by typing
 
-    pythong mean.py
-
-which generates the file `mean.png`.  Similarly for `phi.py` and these are used by typing
-
-    pythong mean.py
+    python mean.py
 
 which generates the file `mean.png`.  Similarly for `phi.py`.
 
