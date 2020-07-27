@@ -717,7 +717,7 @@ c***********************************************************************
         eta(j) = 0.0
       end do
 c
-c     Set the boundary conditions including guess for f"(0)
+c     Set the boundary conditions including guess for d2f(0)
 c      
       xi(1,0) = 0
       xi(2,0) = 0
@@ -742,7 +742,7 @@ c
 #endif
         end do
 c
-c       Check f'(ymax)
+c       Check df(ymax)
 c      
         if (p .eq. 1) then
           xi3old = xi(3,0)
@@ -794,7 +794,7 @@ c
           call SPEVAL(n+1,ydat,u,uspl,y,us)
           call SPEVAL(n+1,ydat,d2u,d2uspl,y,d2us)
         write (10,10) y, us, d2us, u(i), d2u(i)
-  10    format (1x,5(1PE20.13E2,1x))
+  10    format (1x,5(1PE20.12E3,1x))
       end do
       
       write (*,20) 
