@@ -92,7 +92,7 @@ Just computing the Blasisus boundary layer alone (no eigenanalysis):
 
 A spatial analysis for BL is done using:
 
-    ./orrsspace 
+    ./orrspace 
 
 And then type `space.inp` for input file.
 
