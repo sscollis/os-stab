@@ -31,5 +31,15 @@ nr.f
 *.exe
 *.out
 *.app
+
+.DS_Store
 lns3d
 pre
+bl
+conte
+contebl
+conteucbl
+fort.*
+mean.png
+orrsom
+orrspace
