@@ -161,4 +161,5 @@ channel profiles
 
 `orrcolchan.f`	Solve Orr-Sommerfeld for channel profile
 
-S. Scott Collis
+S. Scott Collis\
+flow.physics.simulation@gmail.com
