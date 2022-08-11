@@ -1,12 +1,12 @@
-## OS-Stab
+# OS-Stab
 
-### Description
+## Description
 
 Performs stability analsysis for incompressible flows by solving the Orr-Sommerfeld equation 
 for planar channel flow, the Blasius boundary layer, or for a given arbitary mean velocity
 profile.  Note that in all cases, the parallel-flow approximation is made. 
 
-### Background
+## Background
 
 Several different solvers are provided using different numerical methods including stablized
 shooting, Chebyschev spectral collocation, and finite-difference discretization. Solvers
@@ -42,13 +42,18 @@ and matplotlib.   See `mean.py` and `phi.py` and these are used by typing
 
 which generates the file `mean.png`.  Similarly for `phi.py`.
 
-### Building
+## Building
 
-Should build on platforms with Gfortran.  Start by typing:
+Should build on Linux and MacOS platforms with Gfortran.  First, as usual, you will clone
+the repository from GitHub using a command such as:
+
+   git clone https://github.com/sscollis/os-stab.git
+
+You can get simple help on building the applications(s) by typing:
 
     make help
 
-Default build is:
+And the default build is simply:
 
     make 
 
@@ -61,13 +66,13 @@ You can make the Doxygen documentation using:
     make docs
 
 and then you can view the documentation locally by pointing your browser at
-`html/index.html`. For example, on a Mac you simply type
+`html/index.html`. For example, on a Mac you type
 
     open html/index.html
 
-from within the main `os-stab` directory.
+from within the main `os-stab` directory to view the Doxygen documentation.
 
-### Running
+## Running
 
 The simplest case is temporal stability analysis for a planar channel using
 Conte's method and shooting:
@@ -102,7 +107,7 @@ You can do a sweep through the stability curve using:
 
 And enter `sweep.inp` as the input file.
 
-#### Additional examples
+### Additional examples
 
 These examples require that one currently builds with `USE_ALL_NR=1` that 
 requires the user to supply commercially licenses code from Numerical Recipes
@@ -122,7 +127,7 @@ or a single alpha and printing the eigenfunction:
 
 NOTE:  There currently are not example inputs for all codes!
 
-### Updates as of 12-30-2019
+## Updates as of 12-30-2019
 
 Updated Orr-Sommerfeld solvers for gfortran 
 
@@ -147,7 +152,7 @@ Numerous updates in this version include:
   7. Use OpenBLAS for numerical linear algebra
   8. Works on Mac OS-X (Darwin)
 
-### Updates as of 7-13-97
+## Updates as of 7-13-97
 
 Incompressible Orr--Sommerfeld Solvers for Channel flow and Blasius Boundary
 Layer.  Also `bl.f` is a spectral blasius flow solver.
