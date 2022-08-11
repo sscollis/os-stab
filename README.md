@@ -47,7 +47,7 @@ which generates the file `mean.png`.  Similarly for `phi.py`.
 Should build on Linux and MacOS platforms with Gfortran.  First, as usual, you will clone
 the repository from GitHub using a command such as:
 
-   git clone https://github.com/sscollis/os-stab.git
+    git clone https://github.com/sscollis/os-stab.git
 
 You can get simple help on building the applications(s) by typing:
 
