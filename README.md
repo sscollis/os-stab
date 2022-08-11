@@ -1,4 +1,4 @@
-# OS-Stab
+# OS-Stab:  Orr-Sommerfeld Stability Solver
 
 ## Description
 
