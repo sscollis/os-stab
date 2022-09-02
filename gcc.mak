@@ -12,44 +12,46 @@
 # you can activate it with this define.  
 #
 ifdef USE_NR_ALL
-	USE_NR = 1
-	USE_NR_ODEINT = 1
-	USE_NR_HUNT = 1
+  USE_NR = 1
+  #USE_NR_ODEINT = 1
+  USE_NR_HUNT = 1
 endif
 ifdef USE_NR
 ifdef USE_NR_ODEINT
-  DEFINES += -DUSE_NR_ODEINT
+  #DEFINES += -DUSE_NR_ODEINT
 endif
 ifdef USE_NR_HUNT
   DEFINES += -DUSE_NR_HUNT
 endif
-	NR_OBJ = nr.o
+  NR_OBJ = 
+  NR_LIB = ../NR-utilities/libnr.a 
+#nr.o
 endif
 #
 # Experimental (don't use)
 #
 ifdef USE_RKF45
-	DEFINES += -DUSE_RKF45
-	RKF45_OBJ = rkf45.o
+  DEFINES += -DUSE_RKF45
+  RKF45_OBJ = rkf45.o
 endif
 #
 # High order, but RKCK45 works better in practise
 #
 ifdef USE_LSRK14
-	DEFINES += -DUSE_LSRK14
+  DEFINES += -DUSE_LSRK14
 endif
 #
 # This currently is the best choice
 #
 ifdef USE_RKCK45
-	DEFINES += -DUSE_RKCK45
+  DEFINES += -DUSE_RKCK45
 endif
 #
 # Experimental (i.e. don't use) 
 #
 ifdef USE_VODE
-	DEFINES += -DUSE_VODE
-	VODE_OBJ = zvode.o
+  DEFINES += -DUSE_VODE
+  VODE_OBJ = zvode.o
 endif
 #
 # Compilers
@@ -62,7 +64,7 @@ F77 = gfortran
 # Define all objects
 #
 ALL = bl conte contebl conteucbl orrncbl orrcolchan orrsom orrspace \
-			orrfdbl orrfdchan orrbfs orrucbfs orrucbl orrwong shoot
+orrfdbl orrfdchan orrbfs orrucbfs orrucbl orrwong shoot
 #
 OBJS = $(foreach module, $(ALL), $(module).o) $(NR_OBJ)
 #
@@ -76,11 +78,25 @@ OPT = -O2 -ffpe-trap=invalid,zero,overflow
 FFLAGS = -cpp -ffixed-line-length-120 -freal-4-real-8 -fdefault-real-8 \
          -fdefault-integer-8 -std=legacy $(DEFINES) $(OPT) $(DEBUG)
 F90FLAGS = -cpp -freal-4-real-8 -fdefault-real-8 -fdefault-integer-8 \
-					 $(DEFINES) $(OPT) $(DEBUG)
+         $(DEFINES) $(OPT) $(DEBUG)
+#
+# Use the correct OpenBLAS
+#
+ifdef USE_LOCAL_OPENBLAS
+  OPENBLAS = -L$(HOME)/local/OpenBLAS/lib -lopenblas
+else ifdef USE_HOMEBREW_OPENBLAS
+  OPENBLAS = -L/usr/local/opt/openblas/lib -lopenblas
+else ifdef USE_APPLEBREW_OPENBLAS
+  OPENBLAS = -L/opt/homebrew/opt/openblas/lib -lopenblas
+else ifdef USE_LINUXBREW_OPENBLAS
+  OPENBLAS = -L/home/linuxbrew/.linuxbrew/opt/openblas/lib -lopenblas
+else
+  OPENBLAS = -L$(HOME)/local/OpenBLAS/lib -lopenblas
+endif
 #
 # External Libraries
 #
-LIB = -L$(HOME)/local/OpenBLAS/lib -lopenblas $(NR_OBJ) $(RKF45_OBJ) $(VODE_OBJ)
+LIB = $(OPENBLAS) $(NR_LIB) $(RKF45_OBJ) $(VODE_OBJ)
 #
 #  Define Fortran 90 suffix
 #

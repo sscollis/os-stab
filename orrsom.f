@@ -266,8 +266,8 @@ c
             do i = 1, n
               Utemp(i) = U(i,m,k-1)
             end do
-            call ODEINT(Utemp,n,t+h,t,1.E-5,-h/2.,1.e-20,nok,nbad,
-     &                  FHOMO,RKQC)
+            call NR_CODEINT(Utemp,n,t+h,t,1.E-5,-h/2.,1.e-20,nok,nbad,
+     &                      FHOMO,NR_CRKQC)
 c           write (*,*) k, nok, nbad
             do i = 1, n
               U(i,m,k) = Utemp(i)
